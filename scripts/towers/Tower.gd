@@ -1,0 +1,187 @@
+extends Node2D
+
+const PROJECTILE_SCENE := preload("res://scenes/projectiles/Projectile.tscn")
+
+var tower_id := "basic"
+var display_name := "Tower"
+var damage := 10.0
+var attack_range := 120.0
+var fire_rate := 0.5
+var splash_radius := 0.0
+var slow := 0.0
+var body_color := Color("#f5c542")
+var cooldown := 0.0
+var cost := 0
+var slot_index := -1
+var upgrade_level := 1
+var selected := false
+var aim_angle := 0.0
+
+func _ready() -> void:
+	queue_redraw()
+
+func configure(id: String, data: Dictionary) -> void:
+	tower_id = id
+	display_name = data["name"]
+	damage = float(data["damage"])
+	attack_range = float(data["range"])
+	fire_rate = float(data["fire_rate"])
+	splash_radius = float(data["splash_radius"])
+	slow = float(data["slow"])
+	body_color = Color.html(str(data["color"]))
+	cost = int(data["cost"])
+
+func _process(delta: float) -> void:
+	cooldown -= delta
+	var target: Node2D = _find_target()
+	if target != null:
+		aim_angle = global_position.angle_to_point(target.global_position)
+		queue_redraw()
+
+	if cooldown > 0.0:
+		return
+
+	if target != null:
+		_fire_at(target)
+		cooldown = fire_rate
+
+func _find_target():
+	var best_target = null
+	var best_distance := INF
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy):
+			continue
+		var distance := global_position.distance_to(enemy.global_position)
+		if distance <= attack_range and distance < best_distance:
+			best_distance = distance
+			best_target = enemy
+	return best_target
+
+func get_upgrade_cost() -> int:
+	return int(round(cost * (0.75 + (upgrade_level - 1) * 0.35)))
+
+func get_sell_value() -> int:
+	return int(round(cost * 0.6))
+
+func upgrade(path_id: String) -> void:
+	var paid_cost := get_upgrade_cost()
+	upgrade_level += 1
+	_apply_upgrade_path(path_id)
+	cost += paid_cost
+	queue_redraw()
+
+func get_upgrade_options() -> Array:
+	match tower_id:
+		"slow":
+			return [
+				{"id": "a", "name": "Sticky", "description": "Stronger slow compound."},
+				{"id": "b", "name": "Wide", "description": "Longer foam spray range."}
+			]
+		"splash":
+			return [
+				{"id": "a", "name": "Heavy", "description": "Higher shell damage."},
+				{"id": "b", "name": "Blast", "description": "Larger explosion radius."}
+			]
+		_:
+			return [
+				{"id": "a", "name": "Rapid", "description": "Faster rivet feed."},
+				{"id": "b", "name": "Sharp", "description": "Higher rivet damage."}
+			]
+
+func get_stats_summary() -> String:
+	match tower_id:
+		"slow":
+			return "Damage %.0f | Slow %.0f%% | Range %.0f" % [damage, slow * 100.0, attack_range]
+		"splash":
+			return "Damage %.0f | Blast %.0f | Range %.0f" % [damage, splash_radius, attack_range]
+		_:
+			return "Damage %.0f | Rate %.2fs | Range %.0f" % [damage, fire_rate, attack_range]
+
+func _apply_upgrade_path(path_id: String) -> void:
+	match tower_id:
+		"slow":
+			_apply_foam_upgrade(path_id)
+		"splash":
+			_apply_mortar_upgrade(path_id)
+		_:
+			_apply_rivet_upgrade(path_id)
+
+func _apply_rivet_upgrade(path_id: String) -> void:
+	if path_id == "a":
+		fire_rate = max(fire_rate * 0.72, 0.14)
+		damage *= 1.08
+	else:
+		damage *= 1.38
+		attack_range += 6.0
+
+func _apply_foam_upgrade(path_id: String) -> void:
+	if path_id == "a":
+		slow = min(slow + 0.12, 0.78)
+		damage *= 1.08
+	else:
+		attack_range += 26.0
+		fire_rate = max(fire_rate * 0.9, 0.26)
+
+func _apply_mortar_upgrade(path_id: String) -> void:
+	if path_id == "a":
+		damage *= 1.48
+		fire_rate = max(fire_rate * 0.98, 0.75)
+	else:
+		splash_radius += 28.0
+		damage *= 1.12
+	attack_range += 8.0
+
+func set_selected(value: bool) -> void:
+	selected = value
+	queue_redraw()
+
+func _fire_at(target) -> void:
+	var projectile = PROJECTILE_SCENE.instantiate()
+	projectile.configure(target, damage, splash_radius, slow, body_color)
+	projectile.global_position = global_position
+	get_tree().current_scene.add_child(projectile)
+	var audio_manager := get_tree().current_scene.get_node_or_null("AudioManager")
+	if audio_manager != null and audio_manager.has_method("play"):
+		audio_manager.play("tower_fire")
+
+func _draw() -> void:
+	if selected:
+		draw_circle(Vector2.ZERO, attack_range, Color(1.0, 1.0, 1.0, 0.08))
+		draw_circle(Vector2.ZERO, 24.0, Color("#f8fafc"), false, 3.0)
+	match tower_id:
+		"slow":
+			_draw_foam_tower()
+		"splash":
+			_draw_mortar_tower()
+		_:
+			_draw_rivet_tower()
+	draw_string(ThemeDB.fallback_font, Vector2(-5, 6), str(upgrade_level), HORIZONTAL_ALIGNMENT_CENTER, 10, 12, Color("#111827"))
+
+func _draw_rivet_tower() -> void:
+	draw_circle(Vector2.ZERO, 19.0, body_color)
+	draw_circle(Vector2.ZERO, 19.0, Color("#111827"), false, 3.0)
+	draw_set_transform(Vector2.ZERO, aim_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(4, -5), Vector2(28, 10)), Color("#111827"))
+	draw_rect(Rect2(Vector2(6, -3), Vector2(23, 6)), Color("#9ca3af"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_circle(Vector2.ZERO, 8.0, Color("#f8fafc"))
+
+func _draw_foam_tower() -> void:
+	draw_rect(Rect2(Vector2(-18, -16), Vector2(36, 32)), body_color)
+	draw_rect(Rect2(Vector2(-18, -16), Vector2(36, 32)), Color("#111827"), false, 3.0)
+	draw_circle(Vector2(-7, 0), 6.0, Color("#ecfeff"))
+	draw_circle(Vector2(7, 0), 6.0, Color("#ecfeff"))
+	draw_set_transform(Vector2.ZERO, aim_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(8, -4), Vector2(24, 8)), Color("#164e63"))
+	draw_circle(Vector2(34, 0), 5.0, Color("#67e8f9"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_mortar_tower() -> void:
+	draw_circle(Vector2.ZERO, 20.0, body_color)
+	draw_circle(Vector2.ZERO, 20.0, Color("#111827"), false, 3.0)
+	draw_rect(Rect2(Vector2(-13, 8), Vector2(26, 8)), Color("#111827"))
+	draw_set_transform(Vector2.ZERO, aim_angle - 0.45, Vector2.ONE)
+	draw_rect(Rect2(Vector2(0, -8), Vector2(30, 16)), Color("#111827"))
+	draw_rect(Rect2(Vector2(3, -5), Vector2(24, 10)), Color("#9ca3af"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_circle(Vector2.ZERO, 7.0, Color("#fecdd3"))
