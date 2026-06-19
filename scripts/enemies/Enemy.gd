@@ -84,6 +84,20 @@ func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0) -
 	else:
 		queue_redraw()
 
+func get_path_progress() -> float:
+	if path_points.size() < 2:
+		return float(path_index)
+
+	var next_index: int = min(path_index + 1, path_points.size() - 1)
+	var segment_start: Vector2 = path_points[path_index]
+	var segment_end: Vector2 = path_points[next_index]
+	var segment_length: float = segment_start.distance_to(segment_end)
+	if is_zero_approx(segment_length):
+		return float(path_index)
+
+	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
+	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
+
 func _spawn_death_pop() -> void:
 	var pop := Node2D.new()
 	pop.set_script(DEATH_POP_SCRIPT)

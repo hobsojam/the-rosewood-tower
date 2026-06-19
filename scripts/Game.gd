@@ -47,6 +47,7 @@ var settings_button: Button
 var pause_button: Button
 var speed_1x_button: Button
 var speed_2x_button: Button
+var targeting_button: Button
 var upgrade_a_button: Button
 var upgrade_b_button: Button
 var sell_button: Button
@@ -234,7 +235,7 @@ func _create_feedback_overlays() -> void:
 func _create_selection_panel() -> void:
 	selection_panel = PanelContainer.new()
 	selection_panel.position = Vector2(UI_X, 392)
-	selection_panel.custom_minimum_size = Vector2(UI_WIDTH, 160)
+	selection_panel.custom_minimum_size = Vector2(UI_WIDTH, 176)
 	hud_layer.add_child(selection_panel)
 
 	var layout := VBoxContainer.new()
@@ -244,6 +245,10 @@ func _create_selection_panel() -> void:
 	selected_tower_label = Label.new()
 	selected_tower_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(selected_tower_label)
+
+	targeting_button = Button.new()
+	targeting_button.pressed.connect(_on_targeting_pressed)
+	layout.add_child(targeting_button)
 
 	var button_row := HBoxContainer.new()
 	button_row.add_theme_constant_override("separation", 6)
@@ -436,12 +441,14 @@ func _update_selection_panel() -> void:
 
 	var upgrade_cost: int = selected_tower.get_upgrade_cost()
 	var sell_value: int = selected_tower.get_sell_value()
-	selected_tower_label.text = "%s L%s\n%s\nPick upgrade | Sell $%s" % [
+	selected_tower_label.text = "%s L%s\n%s\nSell $%s" % [
 		selected_tower.display_name,
 		selected_tower.upgrade_level,
 		selected_tower.get_stats_summary(),
 		sell_value
 	]
+	targeting_button.text = "Target: %s" % selected_tower.get_targeting_label()
+	targeting_button.disabled = wave_manager.game_over
 	var upgrade_options: Array = selected_tower.get_upgrade_options()
 	upgrade_a_button.text = "%s $%s" % [upgrade_options[0]["name"], upgrade_cost]
 	upgrade_b_button.text = "%s $%s" % [upgrade_options[1]["name"], upgrade_cost]
@@ -473,6 +480,14 @@ func _on_upgrade_pressed(path_id: String) -> void:
 	_play_sound("upgrade")
 	status_label.text = "%s upgraded to level %s." % [selected_tower.display_name, selected_tower.upgrade_level]
 	_update_hud()
+
+func _on_targeting_pressed() -> void:
+	if selected_tower == null or not is_instance_valid(selected_tower):
+		return
+
+	selected_tower.cycle_targeting_mode()
+	status_label.text = "%s targeting %s." % [selected_tower.display_name, selected_tower.get_targeting_label()]
+	_update_selection_panel()
 
 func _on_sell_pressed() -> void:
 	if selected_tower == null or not is_instance_valid(selected_tower):

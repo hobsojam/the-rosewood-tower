@@ -1,6 +1,14 @@
 extends Node2D
 
 const PROJECTILE_SCENE := preload("res://scenes/projectiles/Projectile.tscn")
+const TARGETING_MODES := ["nearest", "first", "last", "strongest", "weakest"]
+const TARGETING_LABELS := {
+	"nearest": "Nearest",
+	"first": "First",
+	"last": "Last",
+	"strongest": "Strongest",
+	"weakest": "Weakest"
+}
 
 var tower_id := "basic"
 var display_name := "Tower"
@@ -16,6 +24,7 @@ var slot_index := -1
 var upgrade_level := 1
 var selected := false
 var aim_angle := 0.0
+var targeting_mode := "nearest"
 
 func _ready() -> void:
 	queue_redraw()
@@ -45,17 +54,49 @@ func _process(delta: float) -> void:
 		_fire_at(target)
 		cooldown = fire_rate
 
-func _find_target():
-	var best_target = null
-	var best_distance := INF
+func _find_target() -> Node2D:
+	var best_target: Node2D = null
+	var best_score := INF
 	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if not is_instance_valid(enemy):
+		var enemy_node := enemy as Node2D
+		if enemy_node == null or not is_instance_valid(enemy_node):
 			continue
-		var distance := global_position.distance_to(enemy.global_position)
-		if distance <= attack_range and distance < best_distance:
-			best_distance = distance
-			best_target = enemy
+		var distance := global_position.distance_to(enemy_node.global_position)
+		if distance > attack_range:
+			continue
+		var score := _get_target_score(enemy_node, distance)
+		if score < best_score:
+			best_score = score
+			best_target = enemy_node
 	return best_target
+
+func _get_target_score(enemy: Node2D, distance: float) -> float:
+	match targeting_mode:
+		"first":
+			return -_get_enemy_path_progress(enemy)
+		"last":
+			return _get_enemy_path_progress(enemy)
+		"strongest":
+			return -_get_enemy_health(enemy)
+		"weakest":
+			return _get_enemy_health(enemy)
+		_:
+			return distance
+
+func _get_enemy_path_progress(enemy: Node2D) -> float:
+	if enemy.has_method("get_path_progress"):
+		return float(enemy.get_path_progress())
+	return 0.0
+
+func _get_enemy_health(enemy: Node2D) -> float:
+	return float(enemy.get("health"))
+
+func cycle_targeting_mode() -> void:
+	var current_index := TARGETING_MODES.find(targeting_mode)
+	targeting_mode = TARGETING_MODES[wrapi(current_index + 1, 0, TARGETING_MODES.size())]
+
+func get_targeting_label() -> String:
+	return str(TARGETING_LABELS.get(targeting_mode, "Nearest"))
 
 func get_upgrade_cost() -> int:
 	return int(round(cost * (0.75 + (upgrade_level - 1) * 0.35)))

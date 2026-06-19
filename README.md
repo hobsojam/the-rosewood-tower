@@ -39,7 +39,7 @@ The current scaffold includes a code-driven map, placement slots, three tower de
 - Hover a green build pad to preview the selected tower's range.
 - Click a green build pad to place the selected tower.
 - Click a placed tower to inspect it.
-- Use the selected tower panel to upgrade or sell it.
+- Use the selected tower panel to cycle targeting, upgrade, or sell it.
 - Press Start Wave to launch the next wave.
 - Use Pause, 1x, and 2x to control game speed during playtests.
 - Use Settings to adjust procedural sound volume or mute audio.
@@ -53,6 +53,7 @@ Armored enemies use a distinct top-down tank-style placeholder drawing.
 Standard and fast enemies now have distinct crawler/drone silhouettes, and each tower type has a unique placeholder shape.
 Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, and Mortar chooses heavy shells or larger blasts.
 Tower weapon parts now aim toward their current target.
+Placed towers can target nearest, first, last, strongest, or weakest enemies.
 The next-wave preview includes compact C/D/T counts for crawler, drone, and tank enemies.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 
