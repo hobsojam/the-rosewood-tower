@@ -1,10 +1,10 @@
-# Industrial City Defense
+# The Rosewood Tower
 
 A Windows-native tower defence game built with Godot 4 and GDScript.
 
 ## Direction
 
-Industrial City Defense is a top-down 2D tower defence game set in a dense industrial district. The player protects critical city infrastructure by placing defensive towers along fixed enemy routes and surviving escalating waves.
+The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial district. The player protects critical city infrastructure by placing defensive towers along fixed enemy routes and surviving escalating waves.
 
 ## First Playable Scope
 
@@ -58,7 +58,7 @@ Maps are loaded from `data/maps.json`; the title screen can switch between Facto
 
 ## Windows Export
 
-The project includes a Windows Desktop export preset at `builds/windows/IndustrialCityDefense.exe`.
+The project includes a Windows Desktop export preset at `builds/windows/TheRosewoodTower.exe`.
 
 From the project folder, export with:
 

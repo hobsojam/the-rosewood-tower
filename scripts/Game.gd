@@ -333,7 +333,7 @@ func _create_title_panel() -> void:
 	title_panel.add_child(layout)
 
 	var title := Label.new()
-	title.text = "Industrial City Defense"
+	title.text = "The Rosewood Tower"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(title)
 
@@ -563,7 +563,7 @@ func _on_wave_completed(_wave_number: int) -> void:
 	_update_hud()
 
 func _on_all_waves_completed() -> void:
-	status_label.text = "Industrial district secured. Victory."
+	status_label.text = "Rosewood sector secured. Victory."
 	_play_sound("victory")
 	_show_banner("District secured", Color("#8bd36b"))
 	_show_end_overlay("Victory: district secured")

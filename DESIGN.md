@@ -1,4 +1,4 @@
-# Industrial City Defense Design Spec
+# The Rosewood Tower Design Spec
 
 ## Product Goal
 
@@ -67,4 +67,3 @@ Planned scene/script layout:
 - Enemies spawn, follow the path, take damage, and either die or reduce lives at the exit.
 - Currency, lives, and wave number are visible.
 - The game reaches a win state after 10 waves or a lose state at 0 lives.
-
