@@ -39,6 +39,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Standard unit: baseline health and speed
 - Fast unit: lower health, higher speed
 - Armored unit: higher health, lower speed
+- Shield carrier: projects a damage-reducing bubble around nearby enemies
 
 ### Progression
 

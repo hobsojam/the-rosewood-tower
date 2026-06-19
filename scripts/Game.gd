@@ -142,7 +142,7 @@ func _create_hud() -> void:
 	var next_wave_row := HBoxContainer.new()
 	next_wave_row.add_theme_constant_override("separation", 6)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "armored"]:
+	for enemy_id in ["standard", "fast", "shield", "armored"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
 		next_wave_row.add_child(label)
@@ -387,6 +387,8 @@ func _get_enemy_icon(enemy_id: String) -> String:
 	match enemy_id:
 		"fast":
 			return "D"
+		"shield":
+			return "S"
 		"armored":
 			return "T"
 		_:
