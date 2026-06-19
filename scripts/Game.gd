@@ -212,8 +212,8 @@ func _create_hud() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 	layout.add_child(settings_button)
 
-	_create_selection_panel()
-	_create_settings_panel()
+	_create_settings_panel(layout)
+	_create_selection_panel(layout)
 	_create_overlay_panel()
 	_create_title_panel()
 	_create_feedback_overlays()
@@ -235,11 +235,10 @@ func _create_feedback_overlays() -> void:
 	banner_label.visible = false
 	hud_layer.add_child(banner_label)
 
-func _create_selection_panel() -> void:
+func _create_selection_panel(parent: VBoxContainer) -> void:
 	selection_panel = PanelContainer.new()
-	selection_panel.position = Vector2(UI_X, 392)
 	selection_panel.custom_minimum_size = Vector2(UI_WIDTH, 176)
-	hud_layer.add_child(selection_panel)
+	parent.add_child(selection_panel)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
@@ -272,11 +271,10 @@ func _create_selection_panel() -> void:
 
 	selection_panel.visible = false
 
-func _create_settings_panel() -> void:
+func _create_settings_panel(parent: VBoxContainer) -> void:
 	settings_panel = PanelContainer.new()
-	settings_panel.position = Vector2(UI_X, 560)
 	settings_panel.custom_minimum_size = Vector2(UI_WIDTH, 124)
-	hud_layer.add_child(settings_panel)
+	parent.add_child(settings_panel)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
