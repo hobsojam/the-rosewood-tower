@@ -148,6 +148,29 @@ func _create_hud() -> void:
 		next_wave_row.add_child(label)
 		next_wave_count_labels[enemy_id] = label
 	layout.add_child(speed_label)
+
+	var speed_row := HBoxContainer.new()
+	speed_row.add_theme_constant_override("separation", 6)
+	layout.add_child(speed_row)
+
+	pause_button = Button.new()
+	pause_button.text = "Pause"
+	pause_button.toggle_mode = true
+	pause_button.pressed.connect(_on_pause_pressed)
+	speed_row.add_child(pause_button)
+
+	speed_1x_button = Button.new()
+	speed_1x_button.text = "1x"
+	speed_1x_button.toggle_mode = true
+	speed_1x_button.pressed.connect(_on_speed_pressed.bind(1.0))
+	speed_row.add_child(speed_1x_button)
+
+	speed_2x_button = Button.new()
+	speed_2x_button.text = "2x"
+	speed_2x_button.toggle_mode = true
+	speed_2x_button.pressed.connect(_on_speed_pressed.bind(2.0))
+	speed_row.add_child(speed_2x_button)
+
 	layout.add_child(status_label)
 
 	var button_row := HBoxContainer.new()
@@ -186,28 +209,6 @@ func _create_hud() -> void:
 	settings_button.toggle_mode = true
 	settings_button.pressed.connect(_on_settings_pressed)
 	layout.add_child(settings_button)
-
-	var speed_row := HBoxContainer.new()
-	speed_row.add_theme_constant_override("separation", 6)
-	layout.add_child(speed_row)
-
-	pause_button = Button.new()
-	pause_button.text = "Pause"
-	pause_button.toggle_mode = true
-	pause_button.pressed.connect(_on_pause_pressed)
-	speed_row.add_child(pause_button)
-
-	speed_1x_button = Button.new()
-	speed_1x_button.text = "1x"
-	speed_1x_button.toggle_mode = true
-	speed_1x_button.pressed.connect(_on_speed_pressed.bind(1.0))
-	speed_row.add_child(speed_1x_button)
-
-	speed_2x_button = Button.new()
-	speed_2x_button.text = "2x"
-	speed_2x_button.toggle_mode = true
-	speed_2x_button.pressed.connect(_on_speed_pressed.bind(2.0))
-	speed_row.add_child(speed_2x_button)
 
 	_create_selection_panel()
 	_create_settings_panel()
