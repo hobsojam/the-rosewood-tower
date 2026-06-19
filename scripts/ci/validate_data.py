@@ -31,7 +31,7 @@ def validate_enemies(enemies):
 
 
 def validate_towers(towers):
-    required = {"basic", "slow", "splash"}
+    required = {"basic", "slow", "splash", "railgun"}
     assert_true(required.issubset(towers.keys()), "Missing required tower definitions")
     for tower_id, tower in towers.items():
         for field in ["name", "cost", "damage", "range", "fire_rate", "splash_radius", "slow", "color"]:

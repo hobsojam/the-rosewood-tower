@@ -32,6 +32,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Basic turret: reliable single-target damage
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
+- Railgun: high-cost, slow-firing beam that pierces enemies in a line
 
 ### Enemies
 

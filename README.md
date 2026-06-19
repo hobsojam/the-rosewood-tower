@@ -10,7 +10,7 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 
 - One map with fixed enemy paths
 - Grid-based tower placement
-- Three tower types: basic, slow, splash
+- Four tower types: basic, slow, splash, railgun
 - Three enemy types: standard, fast, armored
 - Ten waves
 - Per-level tower upgrades
@@ -31,7 +31,7 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 2. Open this folder as a Godot project.
 3. Run the main scene: `res://scenes/Game.tscn`.
 
-The current scaffold includes a code-driven map, placement slots, three tower definitions, three enemy definitions, 10 waves, and basic HUD state.
+The current scaffold includes a code-driven map, placement slots, four tower definitions, three enemy definitions, 10 waves, and basic HUD state.
 
 ## Current Controls
 
@@ -51,7 +51,7 @@ Wave starts, wave clears, enemy deaths, and life loss now have simple visual fee
 Placeholder procedural sound effects are generated in code for tower fire, enemy death, breaches, wave events, upgrades, sells, victory, and defeat.
 Armored enemies use a distinct top-down tank-style placeholder drawing.
 Standard and fast enemies now have distinct crawler/drone silhouettes, and each tower type has a unique placeholder shape.
-Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, and Mortar chooses heavy shells or larger blasts.
+Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
 The next-wave preview includes compact C/D/T counts for crawler, drone, and tank enemies.

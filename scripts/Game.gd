@@ -173,16 +173,18 @@ func _create_hud() -> void:
 
 	layout.add_child(status_label)
 
-	var button_row := HBoxContainer.new()
-	button_row.add_theme_constant_override("separation", 6)
-	layout.add_child(button_row)
+	var button_grid := GridContainer.new()
+	button_grid.columns = 2
+	button_grid.add_theme_constant_override("h_separation", 6)
+	button_grid.add_theme_constant_override("v_separation", 6)
+	layout.add_child(button_grid)
 
-	for tower_id in ["basic", "slow", "splash"]:
+	for tower_id in ["basic", "slow", "splash", "railgun"]:
 		var button := Button.new()
 		button.text = "%s $%s" % [_get_short_tower_name(tower_id), tower_data[tower_id]["cost"]]
 		button.toggle_mode = true
 		button.pressed.connect(_on_tower_type_selected.bind(tower_id))
-		button_row.add_child(button)
+		button_grid.add_child(button)
 		tower_buttons[tower_id] = button
 
 	start_button = Button.new()
@@ -376,6 +378,8 @@ func _get_short_tower_name(tower_id: String) -> String:
 			return "Foam"
 		"splash":
 			return "Mortar"
+		"railgun":
+			return "Rail"
 		_:
 			return str(tower_data[tower_id]["name"])
 
