@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  validate-and-export:
+    name: Validate Godot project and export Windows build
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.4"
+      GODOT_RELEASE: "stable"
+      GODOT_VERSION_STATUS: "4.4.stable"
+      EXPORT_PRESET: "Windows Desktop"
+      EXPORT_PATH: "builds/windows/TheRosewoodTower.exe"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+      - name: Download Godot
+        run: |
+          curl -L -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64.zip"
+          unzip godot.zip -d godot-bin
+          chmod +x godot-bin/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64
+          echo "$PWD/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Install Godot export templates
+        run: |
+          curl -L -o export_templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_export_templates.tpz"
+          unzip export_templates.tpz -d export_templates
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION_STATUS}"
+          cp export_templates/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION_STATUS}/"
+
+      - name: Validate game data
+        run: python scripts/ci/validate_data.py
+
+      - name: Check Godot project
+        run: Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64 --headless --path . --check-only --quit
+
+      - name: Export Windows build
+        run: |
+          mkdir -p builds/windows
+          Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64 --headless --path . --export-release "$EXPORT_PRESET"
+          test -f "$EXPORT_PATH"
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TheRosewoodTower-windows
+          path: builds/windows/
+          if-no-files-found: error
