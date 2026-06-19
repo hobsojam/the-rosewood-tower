@@ -1,5 +1,8 @@
 {
   "standard": {"name": "Crawler", "health": 65, "speed": 90, "reward": 7, "color": "#d6dde6"},
   "fast": {"name": "Runner Drone", "health": 38, "speed": 145, "reward": 9, "color": "#62d0ff"},
-  "armored": {"name": "Armored Hauler", "health": 175, "speed": 55, "reward": 14, "color": "#f59e0b"}
+  "armored": {"name": "Armored Hauler", "health": 175, "speed": 55, "reward": 14, "color": "#f59e0b"},
+  "shield": {"name": "Shield Carrier", "health": 120, "speed": 62, "reward": 18, "shield_radius": 86, "shield_reduction": 0.5, "color": "#38bdf8"},
+  "siege": {"name": "Siege Walker", "health": 360, "speed": 38, "reward": 28, "breach_damage": 2, "color": "#ef4444"},
+  "decoy": {"name": "Signal Decoy", "health": 150, "speed": 105, "reward": 3, "color": "#f472b6"}
 }

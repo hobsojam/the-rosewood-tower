@@ -3,7 +3,7 @@ extends Area2D
 const DEATH_POP_SCRIPT := preload("res://scripts/effects/DeathPop.gd")
 
 signal died(reward: int)
-signal reached_exit
+signal reached_exit(breach_damage: int)
 
 var enemy_id := "standard"
 var display_name := "Enemy"
@@ -11,6 +11,9 @@ var max_health := 1.0
 var health := 1.0
 var base_speed := 80.0
 var reward := 1
+var breach_damage := 1
+var shield_radius := 0.0
+var shield_reduction := 0.0
 var path_points := []
 var path_index := 0
 var slow_multiplier := 1.0
@@ -33,6 +36,9 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	health = max_health
 	base_speed = float(data["speed"])
 	reward = int(data["reward"])
+	breach_damage = int(data.get("breach_damage", 1))
+	shield_radius = float(data.get("shield_radius", 0.0))
+	shield_reduction = float(data.get("shield_reduction", 0.0))
 	body_color = Color.html(str(data["color"]))
 	path_points = path.duplicate()
 
@@ -61,7 +67,7 @@ func _process(delta: float) -> void:
 		path_index += 1
 		if path_index >= path_points.size() - 1:
 			finished = true
-			reached_exit.emit()
+			reached_exit.emit(breach_damage)
 			queue_free()
 	else:
 		global_position += direction.normalized() * step
@@ -70,7 +76,7 @@ func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0) -
 	if finished:
 		return
 
-	health -= amount
+	health -= _get_effective_damage(amount)
 	hit_flash_time = 0.08
 	if slow > 0.0:
 		slow_multiplier = clamp(1.0 - slow, 0.2, 1.0)
@@ -98,6 +104,30 @@ func get_path_progress() -> float:
 	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
 	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
 
+func _get_effective_damage(amount: float) -> float:
+	if enemy_id == "shield":
+		return amount
+
+	var strongest_reduction := 0.0
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		var shield_enemy := enemy as Node2D
+		if shield_enemy == null or shield_enemy == self or not is_instance_valid(shield_enemy):
+			continue
+		if not shield_enemy.has_method("get_shield_reduction"):
+			continue
+
+		var reduction: float = shield_enemy.get_shield_reduction(global_position)
+		strongest_reduction = max(strongest_reduction, reduction)
+
+	return amount * (1.0 - strongest_reduction)
+
+func get_shield_reduction(point: Vector2) -> float:
+	if finished or shield_radius <= 0.0:
+		return 0.0
+	if global_position.distance_to(point) > shield_radius:
+		return 0.0
+	return shield_reduction
+
 func _spawn_death_pop() -> void:
 	var pop := Node2D.new()
 	pop.set_script(DEATH_POP_SCRIPT)
@@ -108,8 +138,14 @@ func _spawn_death_pop() -> void:
 func _draw() -> void:
 	var color := Color.WHITE if hit_flash_time > 0.0 else body_color
 	match enemy_id:
+		"siege":
+			_draw_siege_enemy(color)
+		"decoy":
+			_draw_decoy_enemy(color)
 		"armored":
 			_draw_armored_enemy(color)
+		"shield":
+			_draw_shield_enemy(color)
 		"fast":
 			_draw_fast_enemy(color)
 		_:
@@ -155,4 +191,43 @@ func _draw_armored_enemy(color: Color) -> void:
 	draw_circle(Vector2(2, 0), 8.0, Color("#111827"), false, 2.0)
 	draw_rect(Rect2(Vector2(5, -3), Vector2(20, 6)), Color("#111827"))
 	draw_rect(Rect2(Vector2(7, -2), Vector2(16, 4)), Color("#9ca3af"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_shield_enemy(color: Color) -> void:
+	draw_circle(Vector2.ZERO, shield_radius, Color(0.22, 0.72, 0.95, 0.08))
+	draw_circle(Vector2.ZERO, shield_radius, Color(0.56, 0.84, 1.0, 0.28), false, 2.0)
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(-14, -13), Vector2(28, 26)), Color("#0f172a"))
+	draw_rect(Rect2(Vector2(-11, -10), Vector2(22, 20)), color)
+	draw_circle(Vector2.ZERO, 9.0, Color("#e0f2fe"))
+	draw_circle(Vector2.ZERO, 9.0, Color("#0f172a"), false, 2.0)
+	draw_line(Vector2(0, -13), Vector2(0, 13), Color("#bae6fd"), 3.0)
+	draw_line(Vector2(-13, 0), Vector2(13, 0), Color("#bae6fd"), 3.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_siege_enemy(color: Color) -> void:
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(-24, -16), Vector2(48, 32)), Color("#111827"))
+	draw_rect(Rect2(Vector2(-21, -13), Vector2(42, 26)), color)
+	draw_rect(Rect2(Vector2(-27, -19), Vector2(54, 6)), Color("#2f3a44"))
+	draw_rect(Rect2(Vector2(-27, 13), Vector2(54, 6)), Color("#2f3a44"))
+	for tread_x in [-18, -9, 0, 9, 18]:
+		draw_line(Vector2(tread_x, -19), Vector2(tread_x - 5, -13), Color("#94a3b8"), 2.0)
+		draw_line(Vector2(tread_x, 19), Vector2(tread_x - 5, 13), Color("#94a3b8"), 2.0)
+	draw_rect(Rect2(Vector2(-8, -9), Vector2(18, 18)), Color("#7f1d1d"))
+	draw_rect(Rect2(Vector2(8, -4), Vector2(25, 8)), Color("#111827"))
+	draw_rect(Rect2(Vector2(11, -2), Vector2(18, 4)), Color("#fecaca"))
+	draw_circle(Vector2(-14, 0), 5.0, Color("#fee2e2"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_decoy_enemy(color: Color) -> void:
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_circle(Vector2.ZERO, 18.0, Color("#111827"))
+	draw_circle(Vector2.ZERO, 15.0, color)
+	draw_circle(Vector2.ZERO, 8.0, Color("#fdf2f8"))
+	draw_circle(Vector2.ZERO, 3.0, Color("#831843"))
+	draw_line(Vector2(-22, -12), Vector2(-8, -5), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(-22, 12), Vector2(-8, 5), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(8, -5), Vector2(22, -12), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(8, 5), Vector2(22, 12), Color("#f9a8d4"), 3.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

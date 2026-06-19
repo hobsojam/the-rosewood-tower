@@ -119,12 +119,16 @@ func _create_hud() -> void:
 
 	hud_panel = PanelContainer.new()
 	hud_panel.position = Vector2(UI_X, 16)
-	hud_panel.custom_minimum_size = Vector2(UI_WIDTH, 360)
+	hud_panel.custom_minimum_size = Vector2(UI_WIDTH, 688)
 	hud_layer.add_child(hud_panel)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(UI_WIDTH, 688)
+	hud_panel.add_child(scroll)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
-	hud_panel.add_child(layout)
+	scroll.add_child(layout)
 
 	money_label = Label.new()
 	lives_label = Label.new()
@@ -139,27 +143,54 @@ func _create_hud() -> void:
 	layout.add_child(wave_label)
 	layout.add_child(enemies_label)
 	layout.add_child(next_wave_label)
-	var next_wave_row := HBoxContainer.new()
-	next_wave_row.add_theme_constant_override("separation", 6)
+	var next_wave_row := GridContainer.new()
+	next_wave_row.columns = 3
+	next_wave_row.add_theme_constant_override("h_separation", 8)
+	next_wave_row.add_theme_constant_override("v_separation", 2)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "armored"]:
+	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
 		next_wave_row.add_child(label)
 		next_wave_count_labels[enemy_id] = label
 	layout.add_child(speed_label)
+
+	var speed_row := HBoxContainer.new()
+	speed_row.add_theme_constant_override("separation", 6)
+	layout.add_child(speed_row)
+
+	pause_button = Button.new()
+	pause_button.text = "Pause"
+	pause_button.toggle_mode = true
+	pause_button.pressed.connect(_on_pause_pressed)
+	speed_row.add_child(pause_button)
+
+	speed_1x_button = Button.new()
+	speed_1x_button.text = "1x"
+	speed_1x_button.toggle_mode = true
+	speed_1x_button.pressed.connect(_on_speed_pressed.bind(1.0))
+	speed_row.add_child(speed_1x_button)
+
+	speed_2x_button = Button.new()
+	speed_2x_button.text = "2x"
+	speed_2x_button.toggle_mode = true
+	speed_2x_button.pressed.connect(_on_speed_pressed.bind(2.0))
+	speed_row.add_child(speed_2x_button)
+
 	layout.add_child(status_label)
 
-	var button_row := HBoxContainer.new()
-	button_row.add_theme_constant_override("separation", 6)
-	layout.add_child(button_row)
+	var button_grid := GridContainer.new()
+	button_grid.columns = 2
+	button_grid.add_theme_constant_override("h_separation", 6)
+	button_grid.add_theme_constant_override("v_separation", 6)
+	layout.add_child(button_grid)
 
-	for tower_id in ["basic", "slow", "splash"]:
+	for tower_id in ["basic", "slow", "splash", "railgun"]:
 		var button := Button.new()
 		button.text = "%s $%s" % [_get_short_tower_name(tower_id), tower_data[tower_id]["cost"]]
 		button.toggle_mode = true
 		button.pressed.connect(_on_tower_type_selected.bind(tower_id))
-		button_row.add_child(button)
+		button_grid.add_child(button)
 		tower_buttons[tower_id] = button
 
 	start_button = Button.new()
@@ -187,30 +218,8 @@ func _create_hud() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 	layout.add_child(settings_button)
 
-	var speed_row := HBoxContainer.new()
-	speed_row.add_theme_constant_override("separation", 6)
-	layout.add_child(speed_row)
-
-	pause_button = Button.new()
-	pause_button.text = "Pause"
-	pause_button.toggle_mode = true
-	pause_button.pressed.connect(_on_pause_pressed)
-	speed_row.add_child(pause_button)
-
-	speed_1x_button = Button.new()
-	speed_1x_button.text = "1x"
-	speed_1x_button.toggle_mode = true
-	speed_1x_button.pressed.connect(_on_speed_pressed.bind(1.0))
-	speed_row.add_child(speed_1x_button)
-
-	speed_2x_button = Button.new()
-	speed_2x_button.text = "2x"
-	speed_2x_button.toggle_mode = true
-	speed_2x_button.pressed.connect(_on_speed_pressed.bind(2.0))
-	speed_row.add_child(speed_2x_button)
-
-	_create_selection_panel()
-	_create_settings_panel()
+	_create_settings_panel(layout)
+	_create_selection_panel(layout)
 	_create_overlay_panel()
 	_create_title_panel()
 	_create_feedback_overlays()
@@ -232,11 +241,10 @@ func _create_feedback_overlays() -> void:
 	banner_label.visible = false
 	hud_layer.add_child(banner_label)
 
-func _create_selection_panel() -> void:
+func _create_selection_panel(parent: VBoxContainer) -> void:
 	selection_panel = PanelContainer.new()
-	selection_panel.position = Vector2(UI_X, 392)
 	selection_panel.custom_minimum_size = Vector2(UI_WIDTH, 176)
-	hud_layer.add_child(selection_panel)
+	parent.add_child(selection_panel)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
@@ -269,11 +277,10 @@ func _create_selection_panel() -> void:
 
 	selection_panel.visible = false
 
-func _create_settings_panel() -> void:
+func _create_settings_panel(parent: VBoxContainer) -> void:
 	settings_panel = PanelContainer.new()
-	settings_panel.position = Vector2(UI_X, 560)
 	settings_panel.custom_minimum_size = Vector2(UI_WIDTH, 124)
-	hud_layer.add_child(settings_panel)
+	parent.add_child(settings_panel)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
@@ -375,6 +382,8 @@ func _get_short_tower_name(tower_id: String) -> String:
 			return "Foam"
 		"splash":
 			return "Mortar"
+		"railgun":
+			return "Rail"
 		_:
 			return str(tower_data[tower_id]["name"])
 
@@ -382,8 +391,14 @@ func _get_enemy_icon(enemy_id: String) -> String:
 	match enemy_id:
 		"fast":
 			return "D"
+		"shield":
+			return "S"
+		"decoy":
+			return "X"
 		"armored":
 			return "T"
+		"siege":
+			return "W"
 		_:
 			return "C"
 
@@ -554,8 +569,8 @@ func _on_enemy_died(reward: int) -> void:
 	_play_sound("enemy_death")
 	_update_hud()
 
-func _on_enemy_reached_exit() -> void:
-	lives -= 1
+func _on_enemy_reached_exit(breach_damage: int) -> void:
+	lives -= breach_damage
 	_play_sound("breach")
 	_pulse_breach_flash()
 	if lives <= 0:
@@ -677,7 +692,7 @@ func _update_hud() -> void:
 	lives_label.text = "Lives: %s" % lives
 	wave_label.text = "Wave: %s / %s" % [wave_manager.current_wave + 1, wave_manager.total_waves]
 	enemies_label.text = "Enemies remaining: %s" % wave_manager.get_remaining_enemies()
-	next_wave_label.text = "Next: %s" % wave_manager.get_next_wave_summary()
+	next_wave_label.text = "Next wave:"
 	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
 	for enemy_id in next_wave_count_labels:
 		next_wave_count_labels[enemy_id].text = "%s: %s" % [_get_enemy_icon(enemy_id), int(next_counts.get(enemy_id, 0))]

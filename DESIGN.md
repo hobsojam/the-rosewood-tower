@@ -32,12 +32,16 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Basic turret: reliable single-target damage
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
+- Railgun: high-cost, slow-firing beam that pierces enemies in a line
 
 ### Enemies
 
 - Standard unit: baseline health and speed
 - Fast unit: lower health, higher speed
 - Armored unit: higher health, lower speed
+- Shield carrier: projects a damage-reducing bubble around nearby enemies
+- Siege walker: very slow, very high health, costs two lives on breach
+- Signal decoy: durable low-reward target that wastes unfocused tower fire
 
 ### Progression
 

@@ -1,7 +1,7 @@
 extends Node
 
 signal enemy_died(reward: int)
-signal enemy_reached_exit
+signal enemy_reached_exit(breach_damage: int)
 signal wave_started(wave_number: int)
 signal wave_completed(wave_number: int)
 signal all_waves_completed
@@ -63,21 +63,28 @@ func _spawn_wave(wave: Dictionary) -> void:
 	_check_wave_completion()
 
 func _build_spawn_queue(wave: Dictionary) -> Array:
-	var remaining := {
-		"standard": int(wave.get("standard", 0)),
-		"fast": int(wave.get("fast", 0)),
-		"armored": int(wave.get("armored", 0))
-	}
-	var order := ["standard", "fast", "standard", "armored"]
+	var remaining := {}
+	for enemy_id in enemy_data.keys():
+		remaining[enemy_id] = int(wave.get(enemy_id, 0))
+	var order := ["standard", "fast", "decoy", "shield", "standard", "armored", "siege"]
+	for enemy_id in remaining.keys():
+		if not order.has(enemy_id):
+			order.append(enemy_id)
 	var queue := []
 
-	while remaining["standard"] > 0 or remaining["fast"] > 0 or remaining["armored"] > 0:
+	while _has_queued_enemy(remaining):
 		for enemy_id in order:
-			if remaining[enemy_id] > 0:
+			if int(remaining.get(enemy_id, 0)) > 0:
 				queue.append(enemy_id)
 				remaining[enemy_id] -= 1
 
 	return queue
+
+func _has_queued_enemy(remaining: Dictionary) -> bool:
+	for count in remaining.values():
+		if int(count) > 0:
+			return true
+	return false
 
 func _spawn_enemy(enemy_id: String) -> void:
 	var enemy = ENEMY_SCENE.instantiate()
@@ -92,9 +99,9 @@ func _on_enemy_died(reward: int) -> void:
 	enemy_died.emit(reward)
 	_check_wave_completion()
 
-func _on_enemy_reached_exit() -> void:
+func _on_enemy_reached_exit(breach_damage: int) -> void:
 	active_enemies = max(active_enemies - 1, 0)
-	enemy_reached_exit.emit()
+	enemy_reached_exit.emit(breach_damage)
 	_check_wave_completion()
 
 func _check_wave_completion() -> void:
@@ -133,7 +140,7 @@ func get_next_wave_summary() -> String:
 		return "None"
 
 	var parts := []
-	for enemy_id in ["standard", "fast", "armored"]:
+	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
 		var count := int(wave.get(enemy_id, 0))
 		if count > 0:
 			parts.append("%s %s" % [count, enemy_id])

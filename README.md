@@ -10,8 +10,8 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 
 - One map with fixed enemy paths
 - Grid-based tower placement
-- Three tower types: basic, slow, splash
-- Three enemy types: standard, fast, armored
+- Four tower types: basic, slow, splash, railgun
+- Six enemy types: standard, fast, armored, shield, siege, decoy
 - Ten waves
 - Per-level tower upgrades
 - Mouse-first controls
@@ -31,7 +31,7 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 2. Open this folder as a Godot project.
 3. Run the main scene: `res://scenes/Game.tscn`.
 
-The current scaffold includes a code-driven map, placement slots, three tower definitions, three enemy definitions, 10 waves, and basic HUD state.
+The current scaffold includes a code-driven map, placement slots, four tower definitions, six enemy definitions, 10 waves, and basic HUD state.
 
 ## Current Controls
 
@@ -50,8 +50,10 @@ The map reserves the right side for UI, so build pads stay in the left playfield
 Wave starts, wave clears, enemy deaths, and life loss now have simple visual feedback.
 Placeholder procedural sound effects are generated in code for tower fire, enemy death, breaches, wave events, upgrades, sells, victory, and defeat.
 Armored enemies use a distinct top-down tank-style placeholder drawing.
+Shield carriers project a bubble that reduces damage taken by nearby enemies.
+Siege walkers are slow heavy units that cost 2 lives if they breach the exit, while signal decoys are durable low-reward distractions.
 Standard and fast enemies now have distinct crawler/drone silhouettes, and each tower type has a unique placeholder shape.
-Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, and Mortar chooses heavy shells or larger blasts.
+Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
 The next-wave preview includes compact C/D/T counts for crawler, drone, and tank enemies.
