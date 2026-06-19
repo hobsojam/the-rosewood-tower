@@ -142,7 +142,7 @@ func _create_hud() -> void:
 	var next_wave_row := HBoxContainer.new()
 	next_wave_row.add_theme_constant_override("separation", 6)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "shield", "armored"]:
+	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
 		next_wave_row.add_child(label)
@@ -389,8 +389,12 @@ func _get_enemy_icon(enemy_id: String) -> String:
 			return "D"
 		"shield":
 			return "S"
+		"decoy":
+			return "X"
 		"armored":
 			return "T"
+		"siege":
+			return "W"
 		_:
 			return "C"
 
@@ -561,8 +565,8 @@ func _on_enemy_died(reward: int) -> void:
 	_play_sound("enemy_death")
 	_update_hud()
 
-func _on_enemy_reached_exit() -> void:
-	lives -= 1
+func _on_enemy_reached_exit(breach_damage: int) -> void:
+	lives -= breach_damage
 	_play_sound("breach")
 	_pulse_breach_flash()
 	if lives <= 0:

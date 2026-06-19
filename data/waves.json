@@ -2,11 +2,11 @@
   {"standard": 6, "fast": 0, "armored": 0},
   {"standard": 8, "fast": 2, "armored": 0},
   {"standard": 10, "fast": 4, "armored": 0},
-  {"standard": 8, "fast": 6, "armored": 1},
+  {"standard": 8, "fast": 6, "armored": 1, "decoy": 1},
   {"standard": 12, "fast": 6, "armored": 2},
-  {"standard": 10, "fast": 8, "armored": 3, "shield": 1},
-  {"standard": 16, "fast": 10, "armored": 5, "shield": 1},
-  {"standard": 14, "fast": 14, "armored": 6, "shield": 2},
-  {"standard": 18, "fast": 14, "armored": 8, "shield": 2},
-  {"standard": 20, "fast": 16, "armored": 10, "shield": 3}
+  {"standard": 10, "fast": 8, "armored": 3, "shield": 1, "decoy": 2},
+  {"standard": 16, "fast": 10, "armored": 5, "shield": 1, "siege": 1},
+  {"standard": 14, "fast": 14, "armored": 6, "shield": 2, "decoy": 3, "siege": 1},
+  {"standard": 18, "fast": 14, "armored": 8, "shield": 2, "decoy": 3, "siege": 2},
+  {"standard": 20, "fast": 16, "armored": 10, "shield": 3, "decoy": 4, "siege": 3}
 ]

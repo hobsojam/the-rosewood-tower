@@ -3,7 +3,7 @@ extends Area2D
 const DEATH_POP_SCRIPT := preload("res://scripts/effects/DeathPop.gd")
 
 signal died(reward: int)
-signal reached_exit
+signal reached_exit(breach_damage: int)
 
 var enemy_id := "standard"
 var display_name := "Enemy"
@@ -11,6 +11,7 @@ var max_health := 1.0
 var health := 1.0
 var base_speed := 80.0
 var reward := 1
+var breach_damage := 1
 var shield_radius := 0.0
 var shield_reduction := 0.0
 var path_points := []
@@ -35,6 +36,7 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	health = max_health
 	base_speed = float(data["speed"])
 	reward = int(data["reward"])
+	breach_damage = int(data.get("breach_damage", 1))
 	shield_radius = float(data.get("shield_radius", 0.0))
 	shield_reduction = float(data.get("shield_reduction", 0.0))
 	body_color = Color.html(str(data["color"]))
@@ -65,7 +67,7 @@ func _process(delta: float) -> void:
 		path_index += 1
 		if path_index >= path_points.size() - 1:
 			finished = true
-			reached_exit.emit()
+			reached_exit.emit(breach_damage)
 			queue_free()
 	else:
 		global_position += direction.normalized() * step
@@ -136,6 +138,10 @@ func _spawn_death_pop() -> void:
 func _draw() -> void:
 	var color := Color.WHITE if hit_flash_time > 0.0 else body_color
 	match enemy_id:
+		"siege":
+			_draw_siege_enemy(color)
+		"decoy":
+			_draw_decoy_enemy(color)
 		"armored":
 			_draw_armored_enemy(color)
 		"shield":
@@ -197,4 +203,31 @@ func _draw_shield_enemy(color: Color) -> void:
 	draw_circle(Vector2.ZERO, 9.0, Color("#0f172a"), false, 2.0)
 	draw_line(Vector2(0, -13), Vector2(0, 13), Color("#bae6fd"), 3.0)
 	draw_line(Vector2(-13, 0), Vector2(13, 0), Color("#bae6fd"), 3.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_siege_enemy(color: Color) -> void:
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(-24, -16), Vector2(48, 32)), Color("#111827"))
+	draw_rect(Rect2(Vector2(-21, -13), Vector2(42, 26)), color)
+	draw_rect(Rect2(Vector2(-27, -19), Vector2(54, 6)), Color("#2f3a44"))
+	draw_rect(Rect2(Vector2(-27, 13), Vector2(54, 6)), Color("#2f3a44"))
+	for tread_x in [-18, -9, 0, 9, 18]:
+		draw_line(Vector2(tread_x, -19), Vector2(tread_x - 5, -13), Color("#94a3b8"), 2.0)
+		draw_line(Vector2(tread_x, 19), Vector2(tread_x - 5, 13), Color("#94a3b8"), 2.0)
+	draw_rect(Rect2(Vector2(-8, -9), Vector2(18, 18)), Color("#7f1d1d"))
+	draw_rect(Rect2(Vector2(8, -4), Vector2(25, 8)), Color("#111827"))
+	draw_rect(Rect2(Vector2(11, -2), Vector2(18, 4)), Color("#fecaca"))
+	draw_circle(Vector2(-14, 0), 5.0, Color("#fee2e2"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_decoy_enemy(color: Color) -> void:
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_circle(Vector2.ZERO, 18.0, Color("#111827"))
+	draw_circle(Vector2.ZERO, 15.0, color)
+	draw_circle(Vector2.ZERO, 8.0, Color("#fdf2f8"))
+	draw_circle(Vector2.ZERO, 3.0, Color("#831843"))
+	draw_line(Vector2(-22, -12), Vector2(-8, -5), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(-22, 12), Vector2(-8, 5), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(8, -5), Vector2(22, -12), Color("#f9a8d4"), 3.0)
+	draw_line(Vector2(8, 5), Vector2(22, 12), Color("#f9a8d4"), 3.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
