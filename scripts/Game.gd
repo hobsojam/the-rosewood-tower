@@ -119,12 +119,16 @@ func _create_hud() -> void:
 
 	hud_panel = PanelContainer.new()
 	hud_panel.position = Vector2(UI_X, 16)
-	hud_panel.custom_minimum_size = Vector2(UI_WIDTH, 360)
+	hud_panel.custom_minimum_size = Vector2(UI_WIDTH, 688)
 	hud_layer.add_child(hud_panel)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(UI_WIDTH, 688)
+	hud_panel.add_child(scroll)
 
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 6)
-	hud_panel.add_child(layout)
+	scroll.add_child(layout)
 
 	money_label = Label.new()
 	lives_label = Label.new()
@@ -139,8 +143,10 @@ func _create_hud() -> void:
 	layout.add_child(wave_label)
 	layout.add_child(enemies_label)
 	layout.add_child(next_wave_label)
-	var next_wave_row := HBoxContainer.new()
-	next_wave_row.add_theme_constant_override("separation", 6)
+	var next_wave_row := GridContainer.new()
+	next_wave_row.columns = 3
+	next_wave_row.add_theme_constant_override("h_separation", 8)
+	next_wave_row.add_theme_constant_override("v_separation", 2)
 	layout.add_child(next_wave_row)
 	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
 		var label := Label.new()
@@ -686,7 +692,7 @@ func _update_hud() -> void:
 	lives_label.text = "Lives: %s" % lives
 	wave_label.text = "Wave: %s / %s" % [wave_manager.current_wave + 1, wave_manager.total_waves]
 	enemies_label.text = "Enemies remaining: %s" % wave_manager.get_remaining_enemies()
-	next_wave_label.text = "Next: %s" % wave_manager.get_next_wave_summary()
+	next_wave_label.text = "Next wave:"
 	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
 	for enemy_id in next_wave_count_labels:
 		next_wave_count_labels[enemy_id].text = "%s: %s" % [_get_enemy_icon(enemy_id), int(next_counts.get(enemy_id, 0))]
