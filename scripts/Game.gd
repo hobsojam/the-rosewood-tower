@@ -600,7 +600,7 @@ func _on_start_wave_pressed() -> void:
 		return
 
 	if wave_manager.start_next_wave():
-		status_label.text = "Wave in progress."
+		status_label.text = "%s in progress." % wave_manager.get_current_wave_name()
 	else:
 		status_label.text = "Wave already active or game finished."
 	_update_hud()
@@ -663,7 +663,7 @@ func _on_wave_started(_wave_number: int) -> void:
 	_play_sound("wave_start")
 	if int(wave_manager.get_current_wave_counts().get("air", 0)) > 0:
 		_play_sound("helicopter_alert")
-	_show_banner("Wave %s" % _wave_number, Color("#f5c542"))
+	_show_banner("Wave %s: %s" % [_wave_number, wave_manager.get_current_wave_name()], Color("#f5c542"))
 	_update_hud()
 
 func _on_wave_completed(_wave_number: int) -> void:
@@ -999,14 +999,20 @@ func _update_hud() -> void:
 	_clamp_lives()
 	money_label.text = "Money: $%s" % money
 	lives_label.text = "Lives: %s" % lives
-	wave_label.text = "Wave: %s / %s" % [wave_manager.current_wave + 1, wave_manager.total_waves]
+	var current_wave_number: int = max(wave_manager.current_wave + 1, 0)
+	if current_wave_number > 0:
+		wave_label.text = "Wave %s/%s: %s" % [current_wave_number, wave_manager.total_waves, wave_manager.get_current_wave_name()]
+	else:
+		wave_label.text = "Wave: 0 / %s" % wave_manager.total_waves
 	enemies_label.text = "Enemies remaining: %s" % wave_manager.get_remaining_enemies()
-	next_wave_label.text = "Next wave:"
+	next_wave_label.text = "Next: %s" % wave_manager.get_next_wave_name()
 	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
 	for enemy_id in next_wave_count_labels:
 		next_wave_count_labels[enemy_id].text = "%s: %s" % [_get_enemy_icon(enemy_id), int(next_counts.get(enemy_id, 0))]
 	speed_label.text = "Speed: paused" if game_paused else "Speed: %sx" % int(game_speed)
 	start_button.disabled = not game_started or bonus_pending or wave_manager.game_over or wave_manager.spawning or wave_manager.active_enemies > 0
+	var next_wave_name: String = wave_manager.get_next_wave_name()
+	start_button.text = "Start Wave" if next_wave_name == "None" else "Start %s" % next_wave_name
 	restart_button.disabled = not game_started
 	menu_button.disabled = not game_started
 	settings_button.button_pressed = settings_panel.visible

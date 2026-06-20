@@ -33,7 +33,7 @@ func start_next_wave() -> bool:
 	current_wave += 1
 	spawning = true
 	wave_started.emit(current_wave + 1)
-	_spawn_wave(waves[current_wave])
+	_spawn_wave(_get_wave_counts(current_wave))
 	return true
 
 func stop_game() -> void:
@@ -163,9 +163,28 @@ func get_next_wave_counts() -> Dictionary:
 	var next_index := current_wave + 1
 	if next_index >= waves.size():
 		return {}
-	return waves[next_index]
+	return _get_wave_counts(next_index)
 
 func get_current_wave_counts() -> Dictionary:
 	if current_wave < 0 or current_wave >= waves.size():
 		return {}
-	return waves[current_wave]
+	return _get_wave_counts(current_wave)
+
+func get_next_wave_name() -> String:
+	var next_index := current_wave + 1
+	if next_index >= waves.size():
+		return "None"
+	return _get_wave_name(next_index)
+
+func get_current_wave_name() -> String:
+	if current_wave < 0 or current_wave >= waves.size():
+		return "None"
+	return _get_wave_name(current_wave)
+
+func _get_wave_counts(wave_index: int) -> Dictionary:
+	var wave: Dictionary = waves[wave_index]
+	return wave.get("enemies", wave)
+
+func _get_wave_name(wave_index: int) -> String:
+	var wave: Dictionary = waves[wave_index]
+	return str(wave.get("name", "Wave %s" % [wave_index + 1]))

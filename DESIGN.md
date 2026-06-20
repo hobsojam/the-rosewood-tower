@@ -55,7 +55,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Each tower should support at least one upgrade level in the first playable version.
 - Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 - Tower availability can change during a match. Rivets are available at start, most towers can unlock through support choices, and threat-critical counters such as AAA can become the required support choice before their matching threat appears.
-- Waves should have recognizable compositions rather than only additive scaling: rush, armor, shield convoy, decoy clutter, air raid, siege, and mixed finale.
+- Waves should have recognizable names and compositions rather than only additive scaling: rush, armor, shield convoy, decoy clutter, air raid, siege, and mixed finale.
 
 ## Godot Architecture
 
