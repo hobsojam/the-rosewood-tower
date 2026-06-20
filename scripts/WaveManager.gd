@@ -15,6 +15,7 @@ var current_wave := -1
 var total_waves := 0
 var active_enemies := 0
 var queued_enemies := 0
+var queued_enemy_counts := {}
 var spawning := false
 var game_over := false
 var completed_wave_index := -1
@@ -51,15 +52,18 @@ func _spawn_wave(wave: Dictionary) -> void:
 	var queue := _build_spawn_queue(wave)
 
 	queued_enemies = queue.size()
+	queued_enemy_counts = _count_queue(queue)
 	for enemy_id in queue:
 		if game_over:
 			break
 		_spawn_enemy(enemy_id)
 		queued_enemies = max(queued_enemies - 1, 0)
+		queued_enemy_counts[enemy_id] = max(int(queued_enemy_counts.get(enemy_id, 0)) - 1, 0)
 		await get_tree().create_timer(0.55).timeout
 
 	spawning = false
 	queued_enemies = 0
+	queued_enemy_counts = {}
 	_check_wave_completion()
 
 func _build_spawn_queue(wave: Dictionary) -> Array:
@@ -85,6 +89,12 @@ func _has_queued_enemy(remaining: Dictionary) -> bool:
 		if int(count) > 0:
 			return true
 	return false
+
+func _count_queue(queue: Array) -> Dictionary:
+	var counts := {}
+	for enemy_id in queue:
+		counts[enemy_id] = int(counts.get(enemy_id, 0)) + 1
+	return counts
 
 func _spawn_enemy(enemy_id: String) -> void:
 	var enemy = ENEMY_SCENE.instantiate()
@@ -126,6 +136,9 @@ func _finish_wave_if_clear() -> void:
 
 func get_remaining_enemies() -> int:
 	return max(_get_live_enemy_count() + queued_enemies, 0)
+
+func get_queued_enemy_count(enemy_id: String) -> int:
+	return int(queued_enemy_counts.get(enemy_id, 0))
 
 func _get_live_enemy_count() -> int:
 	var count := 0

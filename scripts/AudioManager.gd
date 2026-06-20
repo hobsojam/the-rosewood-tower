@@ -3,6 +3,7 @@ extends Node
 const SAMPLE_RATE := 22050
 
 var sounds := {}
+var loop_players := {}
 var master_volume := 0.7
 var muted := false
 
@@ -22,11 +23,21 @@ func play(sound_id: String) -> void:
 	add_child(player)
 	player.play()
 
+func set_loop_active(sound_id: String, active: bool) -> void:
+	if active:
+		_start_loop(sound_id)
+	else:
+		_stop_loop(sound_id)
+
 func set_master_volume(value: float) -> void:
 	master_volume = clamp(value, 0.0, 1.0)
+	for player in loop_players.values():
+		player.volume_db = linear_to_db(master_volume)
 
 func set_muted(value: bool) -> void:
 	muted = value
+	for player in loop_players.values():
+		player.stream_paused = muted
 
 func get_master_volume() -> float:
 	return master_volume
@@ -44,6 +55,28 @@ func _build_sounds() -> void:
 	sounds["sell"] = _make_tone(360.0, 0.09, 0.2, "sine")
 	sounds["victory"] = _make_chime([523.25, 659.25, 783.99, 1046.5], 0.5, 0.28)
 	sounds["defeat"] = _make_chime([220.0, 164.81, 110.0], 0.5, 0.3)
+	sounds["helicopter_loop"] = _make_helicopter_loop()
+
+func _start_loop(sound_id: String) -> void:
+	if muted or loop_players.has(sound_id) or not sounds.has(sound_id):
+		return
+
+	var player := AudioStreamPlayer.new()
+	player.stream = sounds[sound_id]
+	player.bus = "Master"
+	player.volume_db = linear_to_db(master_volume)
+	add_child(player)
+	loop_players[sound_id] = player
+	player.play()
+
+func _stop_loop(sound_id: String) -> void:
+	if not loop_players.has(sound_id):
+		return
+
+	var player: AudioStreamPlayer = loop_players[sound_id]
+	loop_players.erase(sound_id)
+	player.stop()
+	player.queue_free()
 
 func _make_chime(frequencies: Array, duration: float, volume: float) -> AudioStreamWAV:
 	var stream := AudioStreamWAV.new()
@@ -82,6 +115,31 @@ func _make_tone(frequency: float, duration: float, volume: float, wave: String) 
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = SAMPLE_RATE
 	stream.stereo = false
+	stream.data = data
+	return stream
+
+func _make_helicopter_loop() -> AudioStreamWAV:
+	var duration := 0.9
+	var stream := AudioStreamWAV.new()
+	var frames := int(SAMPLE_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+
+	for i in frames:
+		var t := float(i) / SAMPLE_RATE
+		var blade_phase := fmod(18.0 * t, 1.0)
+		var blade_pulse := pow(max(1.0 - abs(blade_phase - 0.5) * 2.0, 0.0), 5.0)
+		var engine := sin(TAU * 54.0 * t) * 0.22 + sin(TAU * 108.0 * t) * 0.1
+		var chop := (blade_pulse * 2.0 - 0.5) * 0.28
+		var sample := (engine + chop) * 0.45
+		_write_sample(data, i, sample)
+
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = SAMPLE_RATE
+	stream.stereo = false
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	stream.loop_end = frames
 	stream.data = data
 	return stream
 

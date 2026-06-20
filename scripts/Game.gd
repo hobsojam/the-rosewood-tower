@@ -100,6 +100,7 @@ func _process(_delta: float) -> void:
 	if map != null:
 		map.set_hovered_slot(get_global_mouse_position())
 		_update_placement_preview()
+	_update_air_audio()
 	_update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -900,6 +901,21 @@ func _update_tower_unlocks() -> void:
 func _play_sound(sound_id: String) -> void:
 	if audio_manager != null and audio_manager.has_method("play"):
 		audio_manager.play(sound_id)
+
+func _update_air_audio() -> void:
+	if audio_manager == null or not audio_manager.has_method("set_loop_active") or wave_manager == null:
+		return
+	audio_manager.set_loop_active("helicopter_loop", _has_air_threat())
+
+func _has_air_threat() -> bool:
+	if wave_manager.game_over:
+		return false
+	if wave_manager.get_queued_enemy_count("air") > 0:
+		return true
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and str(enemy.get("enemy_id")) == "air":
+			return true
+	return false
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
