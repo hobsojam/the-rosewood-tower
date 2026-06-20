@@ -22,7 +22,7 @@ const TOWER_UNLOCK_BONUSES := [
 const WAVE_BONUSES := [
 	{"id": "budget", "name": "Overtime Budget", "description": "+$75 immediately.", "money": 75},
 	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 3 lives.", "lives": 3},
-	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +15% damage.", "tower_id": "basic", "damage_multiplier": 1.15},
+	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +10% damage.", "tower_id": "basic", "damage_multiplier": 1.1},
 	{"id": "foam_reserve", "name": "Foam Reserves", "description": "Foam towers gain stronger slow.", "tower_id": "slow", "slow_bonus": 0.08},
 	{"id": "mortar_stock", "name": "Mortar Stockpile", "description": "Mortars gain larger blasts.", "tower_id": "splash", "splash_bonus": 14.0},
 	{"id": "rail_calibration", "name": "Rail Calibration", "description": "Railguns gain +18 range.", "tower_id": "railgun", "range_bonus": 18.0}

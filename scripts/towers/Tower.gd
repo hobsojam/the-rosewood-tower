@@ -201,11 +201,11 @@ func _apply_upgrade_path(path_id: String) -> void:
 
 func _apply_rivet_upgrade(path_id: String) -> void:
 	if path_id == "a":
-		fire_rate = max(fire_rate * 0.72, 0.14)
-		damage *= 1.08
+		fire_rate = max(fire_rate * 0.82, 0.18)
+		damage *= 1.05
 	else:
-		damage *= 1.38
-		attack_range += 6.0
+		damage *= 1.24
+		attack_range += 4.0
 
 func _apply_foam_upgrade(path_id: String) -> void:
 	if path_id == "a":

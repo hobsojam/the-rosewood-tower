@@ -134,15 +134,19 @@ func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
 	if traits.has("air") and (damage_tags.has("slow") or damage_tags.has("blast")):
 		return 0.0
 	if traits.has("air") and not damage_tags.has("anti_air"):
-		multiplier *= 0.35
+		multiplier *= 0.15
 	if not traits.has("air") and damage_tags.has("anti_air"):
 		multiplier *= 0.6
 	if traits.has("burrowed") and not damage_tags.has("blast"):
 		multiplier *= 0.45
+	if traits.has("armored") and damage_tags.has("direct") and not damage_tags.has("pierce"):
+		multiplier *= 0.65
 	if traits.has("armored") and damage_tags.has("pierce"):
-		multiplier *= 1.15
+		multiplier *= 1.25
+	if traits.has("heavy") and damage_tags.has("direct") and not damage_tags.has("pierce"):
+		multiplier *= 0.55
 	if traits.has("heavy") and damage_tags.has("blast"):
-		multiplier *= 1.1
+		multiplier *= 1.2
 	return multiplier
 
 func get_shield_reduction(point: Vector2) -> float:

@@ -36,6 +36,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
 - AAA flak turret: anti-air counter offered as the required support unlock before air threats appear; only targets air enemies
 - Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
+- Rivets should remain useful starter towers but should not solve armored, heavy, or air threats efficiently on their own.
 
 ### Enemies
 

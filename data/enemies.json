@@ -1,9 +1,9 @@
 {
-  "standard": {"name": "Crawler", "health": 65, "speed": 90, "reward": 7, "traits": [], "color": "#d6dde6"},
-  "fast": {"name": "Runner Drone", "health": 38, "speed": 145, "reward": 9, "traits": [], "color": "#62d0ff"},
-  "armored": {"name": "Armored Hauler", "health": 175, "speed": 55, "reward": 14, "traits": ["armored"], "color": "#f59e0b"},
-  "shield": {"name": "Shield Carrier", "health": 120, "speed": 62, "reward": 18, "traits": ["support"], "shield_radius": 86, "shield_reduction": 0.5, "color": "#38bdf8"},
-  "siege": {"name": "Siege Walker", "health": 360, "speed": 38, "reward": 28, "traits": ["armored", "heavy"], "breach_damage": 2, "color": "#ef4444"},
-  "decoy": {"name": "Signal Decoy", "health": 150, "speed": 105, "reward": 3, "traits": ["decoy"], "color": "#f472b6"},
-  "air": {"name": "Rotor Drone", "health": 80, "speed": 125, "reward": 16, "traits": ["air"], "color": "#a7f3d0"}
+  "standard": {"name": "Crawler", "health": 70, "speed": 90, "reward": 7, "traits": [], "color": "#d6dde6"},
+  "fast": {"name": "Runner Drone", "health": 46, "speed": 165, "reward": 9, "traits": [], "color": "#62d0ff"},
+  "armored": {"name": "Armored Hauler", "health": 210, "speed": 50, "reward": 16, "traits": ["armored"], "color": "#f59e0b"},
+  "shield": {"name": "Shield Carrier", "health": 135, "speed": 62, "reward": 18, "traits": ["support"], "shield_radius": 92, "shield_reduction": 0.55, "color": "#38bdf8"},
+  "siege": {"name": "Siege Walker", "health": 420, "speed": 38, "reward": 30, "traits": ["armored", "heavy"], "breach_damage": 2, "color": "#ef4444"},
+  "decoy": {"name": "Signal Decoy", "health": 170, "speed": 110, "reward": 3, "traits": ["decoy"], "color": "#f472b6"},
+  "air": {"name": "Rotor Drone", "health": 95, "speed": 135, "reward": 18, "traits": ["air"], "color": "#a7f3d0"}
 }
