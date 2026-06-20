@@ -16,7 +16,8 @@ The game is set in an industrial city district of service roads, rail sidings, p
 4. Towers attack enemies automatically.
 5. Defeated enemies award currency.
 6. Enemies that reach the exit reduce lives.
-7. Player wins after wave 10 or loses when lives reach zero.
+7. After each cleared non-final wave, the player chooses one city support bonus.
+8. Player wins after wave 10 or loses when lives reach zero.
 
 ## Initial Mechanics
 
@@ -47,6 +48,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 
 - Upgrades exist only within a match for the first milestone.
 - Each tower should support at least one upgrade level in the first playable version.
+- Between-wave city support choices grant money, repairs, or tower-specific match bonuses.
 
 ## Godot Architecture
 

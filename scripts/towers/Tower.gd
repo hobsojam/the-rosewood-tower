@@ -114,6 +114,15 @@ func upgrade(path_id: String) -> void:
 	cost += paid_cost
 	queue_redraw()
 
+func apply_match_bonus(effect: Dictionary) -> void:
+	damage *= float(effect.get("damage_multiplier", 1.0))
+	attack_range += float(effect.get("range_bonus", 0.0))
+	fire_rate = max(fire_rate * float(effect.get("fire_rate_multiplier", 1.0)), 0.12)
+	splash_radius += float(effect.get("splash_bonus", 0.0))
+	slow = min(slow + float(effect.get("slow_bonus", 0.0)), 0.82)
+	pierce_width += float(effect.get("pierce_bonus", 0.0))
+	queue_redraw()
+
 func get_upgrade_options() -> Array:
 	match tower_id:
 		"railgun":
