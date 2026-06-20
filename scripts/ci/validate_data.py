@@ -20,7 +20,7 @@ def assert_true(condition, message):
 
 
 def validate_enemies(enemies):
-    required = {"standard", "fast", "armored", "shield", "siege", "decoy"}
+    required = {"standard", "fast", "armored", "shield", "siege", "decoy", "air"}
     assert_true(required.issubset(enemies.keys()), "Missing required enemy definitions")
     for enemy_id, enemy in enemies.items():
         for field in ["name", "health", "speed", "reward", "color"]:
@@ -38,7 +38,7 @@ def validate_enemies(enemies):
 
 
 def validate_towers(towers):
-    required = {"basic", "slow", "splash", "railgun"}
+    required = {"basic", "slow", "splash", "railgun", "aaa"}
     assert_true(required.issubset(towers.keys()), "Missing required tower definitions")
     for tower_id, tower in towers.items():
         for field in ["name", "cost", "damage", "range", "fire_rate", "splash_radius", "slow", "color"]:

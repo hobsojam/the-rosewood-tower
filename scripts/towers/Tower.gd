@@ -82,17 +82,20 @@ func _find_target() -> Node2D:
 	return best_target
 
 func _get_target_score(enemy: Node2D, distance: float) -> float:
+	var anti_air_bias := 0.0
+	if damage_tags.has("anti_air") and _enemy_has_trait(enemy, "air"):
+		anti_air_bias = -10000.0
 	match targeting_mode:
 		"first":
-			return -_get_enemy_path_progress(enemy)
+			return anti_air_bias - _get_enemy_path_progress(enemy)
 		"last":
-			return _get_enemy_path_progress(enemy)
+			return anti_air_bias + _get_enemy_path_progress(enemy)
 		"strongest":
-			return -_get_enemy_health(enemy)
+			return anti_air_bias - _get_enemy_health(enemy)
 		"weakest":
-			return _get_enemy_health(enemy)
+			return anti_air_bias + _get_enemy_health(enemy)
 		_:
-			return distance
+			return anti_air_bias + distance
 
 func _get_enemy_path_progress(enemy: Node2D) -> float:
 	if enemy.has_method("get_path_progress"):
@@ -101,6 +104,10 @@ func _get_enemy_path_progress(enemy: Node2D) -> float:
 
 func _get_enemy_health(enemy: Node2D) -> float:
 	return float(enemy.get("health"))
+
+func _enemy_has_trait(enemy: Node2D, enemy_trait: String) -> bool:
+	var enemy_traits: Array = enemy.get("traits")
+	return enemy_traits.has(enemy_trait)
 
 func cycle_targeting_mode() -> void:
 	var current_index := TARGETING_MODES.find(targeting_mode)
@@ -133,6 +140,11 @@ func apply_match_bonus(effect: Dictionary) -> void:
 
 func get_upgrade_options() -> Array:
 	match tower_id:
+		"aaa":
+			return [
+				{"id": "a", "name": "Tracking", "description": "Faster flak tracking."},
+				{"id": "b", "name": "Ceiling", "description": "Longer anti-air range."}
+			]
 		"railgun":
 			return [
 				{"id": "a", "name": "Capacitor", "description": "More rail damage."},
@@ -158,6 +170,8 @@ func get_stats_summary() -> String:
 	match tower_id:
 		"railgun":
 			return "Damage %.0f | Beam %.0f | Range %.0f" % [damage, pierce_width, attack_range]
+		"aaa":
+			return "Damage %.0f | Rate %.2fs | Range %.0f" % [damage, fire_rate, attack_range]
 		"slow":
 			return "Damage %.0f | Slow %.0f%% | Range %.0f" % [damage, slow * 100.0, attack_range]
 		"splash":
@@ -167,6 +181,8 @@ func get_stats_summary() -> String:
 
 func _apply_upgrade_path(path_id: String) -> void:
 	match tower_id:
+		"aaa":
+			_apply_aaa_upgrade(path_id)
 		"railgun":
 			_apply_railgun_upgrade(path_id)
 		"slow":
@@ -209,6 +225,14 @@ func _apply_railgun_upgrade(path_id: String) -> void:
 		pierce_width += 7.0
 		attack_range += 18.0
 		damage *= 1.12
+
+func _apply_aaa_upgrade(path_id: String) -> void:
+	if path_id == "a":
+		fire_rate = max(fire_rate * 0.72, 0.18)
+		damage *= 1.08
+	else:
+		attack_range += 28.0
+		damage *= 1.16
 
 func set_selected(value: bool) -> void:
 	selected = value
@@ -273,6 +297,8 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, attack_range, Color(1.0, 1.0, 1.0, 0.08))
 		draw_circle(Vector2.ZERO, 24.0, Color("#f8fafc"), false, 3.0)
 	match tower_id:
+		"aaa":
+			_draw_aaa_tower()
 		"railgun":
 			_draw_railgun_tower()
 		"slow":
@@ -322,3 +348,15 @@ func _draw_railgun_tower() -> void:
 	draw_line(Vector2(8, -8), Vector2(28, -8), Color("#f8fafc"), 2.0)
 	draw_line(Vector2(8, 8), Vector2(28, 8), Color("#f8fafc"), 2.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_aaa_tower() -> void:
+	draw_circle(Vector2.ZERO, 19.0, body_color)
+	draw_circle(Vector2.ZERO, 19.0, Color("#111827"), false, 3.0)
+	draw_rect(Rect2(Vector2(-15, 9), Vector2(30, 8)), Color("#111827"))
+	draw_set_transform(Vector2.ZERO, aim_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(4, -8), Vector2(30, 6)), Color("#111827"))
+	draw_rect(Rect2(Vector2(4, 2), Vector2(30, 6)), Color("#111827"))
+	draw_circle(Vector2(36, -5), 3.5, Color("#dcfce7"))
+	draw_circle(Vector2(36, 5), 3.5, Color("#dcfce7"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_circle(Vector2.ZERO, 7.0, Color("#f0fdf4"))

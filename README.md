@@ -10,8 +10,8 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 
 - One map with fixed enemy paths
 - Grid-based tower placement
-- Four tower types: basic, slow, splash, railgun
-- Six enemy types: standard, fast, armored, shield, siege, decoy
+- Five tower types: basic, slow, splash, railgun, AAA
+- Seven enemy types: standard, fast, armored, shield, siege, decoy, air
 - Ten waves
 - Per-level tower upgrades
 - Between-wave support bonuses
@@ -32,11 +32,12 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 2. Open this folder as a Godot project.
 3. Run the main scene: `res://scenes/Game.tscn`.
 
-The current scaffold includes a code-driven map, placement slots, four tower definitions, six enemy definitions, 10 waves, and basic HUD state.
+The current scaffold includes a code-driven map, placement slots, five tower definitions, seven enemy definitions, 10 waves, and basic HUD state.
 
 ## Current Controls
 
 - Select a tower type from the right-side HUD.
+- New tower types unlock through city support choices or escalating threats.
 - Hover a green build pad to preview the selected tower's range.
 - Click a green build pad to place the selected tower.
 - Click a placed tower to inspect it.
@@ -59,6 +60,7 @@ Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sha
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
 Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity.
+Air enemies appear in later waves, and AAA unlocks automatically when air threats are detected.
 Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 The next-wave preview includes compact enemy composition counts.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.

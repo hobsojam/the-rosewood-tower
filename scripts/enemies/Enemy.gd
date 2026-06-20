@@ -131,6 +131,8 @@ func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
 	var multiplier := 1.0
 	if traits.has("air") and not damage_tags.has("anti_air"):
 		multiplier *= 0.35
+	if not traits.has("air") and damage_tags.has("anti_air"):
+		multiplier *= 0.6
 	if traits.has("burrowed") and not damage_tags.has("blast"):
 		multiplier *= 0.45
 	if traits.has("armored") and damage_tags.has("pierce"):
@@ -156,6 +158,8 @@ func _spawn_death_pop() -> void:
 func _draw() -> void:
 	var color := Color.WHITE if hit_flash_time > 0.0 else body_color
 	match enemy_id:
+		"air":
+			_draw_air_enemy(color)
 		"siege":
 			_draw_siege_enemy(color)
 		"decoy":
@@ -248,4 +252,16 @@ func _draw_decoy_enemy(color: Color) -> void:
 	draw_line(Vector2(-22, 12), Vector2(-8, 5), Color("#f9a8d4"), 3.0)
 	draw_line(Vector2(8, -5), Vector2(22, -12), Color("#f9a8d4"), 3.0)
 	draw_line(Vector2(8, 5), Vector2(22, 12), Color("#f9a8d4"), 3.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_air_enemy(color: Color) -> void:
+	draw_circle(Vector2.ZERO, 27.0, Color(0.15, 0.23, 0.42, 0.16))
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	var body := PackedVector2Array([Vector2(18, 0), Vector2(8, -11), Vector2(-15, -9), Vector2(-19, 0), Vector2(-15, 9), Vector2(8, 11)])
+	draw_colored_polygon(body, color)
+	draw_polyline(PackedVector2Array([Vector2(18, 0), Vector2(8, -11), Vector2(-15, -9), Vector2(-19, 0), Vector2(-15, 9), Vector2(8, 11), Vector2(18, 0)]), Color("#111827"), 2.0)
+	draw_line(Vector2(-28, 0), Vector2(28, 0), Color("#e0f2fe"), 4.0)
+	draw_line(Vector2(0, -20), Vector2(0, 20), Color("#e0f2fe"), 4.0)
+	draw_circle(Vector2.ZERO, 7.0, Color("#0f172a"))
+	draw_circle(Vector2(13, 0), 4.0, Color("#dcfce7"))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

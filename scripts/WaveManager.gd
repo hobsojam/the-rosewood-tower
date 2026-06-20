@@ -66,7 +66,7 @@ func _build_spawn_queue(wave: Dictionary) -> Array:
 	var remaining := {}
 	for enemy_id in enemy_data.keys():
 		remaining[enemy_id] = int(wave.get(enemy_id, 0))
-	var order := ["standard", "fast", "decoy", "shield", "standard", "armored", "siege"]
+	var order := ["standard", "fast", "air", "decoy", "shield", "standard", "armored", "siege"]
 	for enemy_id in remaining.keys():
 		if not order.has(enemy_id):
 			order.append(enemy_id)
@@ -140,7 +140,7 @@ func get_next_wave_summary() -> String:
 		return "None"
 
 	var parts := []
-	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
+	for enemy_id in ["standard", "fast", "air", "decoy", "shield", "armored", "siege"]:
 		var count := int(wave.get(enemy_id, 0))
 		if count > 0:
 			parts.append("%s %s" % [count, enemy_id])
