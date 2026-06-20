@@ -34,7 +34,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
-- AAA flak turret: anti-air counter offered as the required support unlock before air threats appear
+- AAA flak turret: anti-air counter offered as the required support unlock before air threats appear; only targets air enemies
 - Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
 
 ### Enemies
@@ -45,7 +45,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Shield carrier: projects a damage-reducing bubble around nearby enemies
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
-- Rotor drone: air enemy that resists non-anti-air damage and is immune to Foam and Mortar damage
+- Rotor drone: air enemy that resists non-anti-air damage and is immune to Foam and Mortar damage; Mortars do not target it
 - Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
 ### Progression

@@ -72,6 +72,8 @@ func _find_target() -> Node2D:
 		var enemy_node := enemy as Node2D
 		if enemy_node == null or not is_instance_valid(enemy_node):
 			continue
+		if not _can_target_enemy(enemy_node):
+			continue
 		var distance := global_position.distance_to(enemy_node.global_position)
 		if distance > attack_range:
 			continue
@@ -81,21 +83,26 @@ func _find_target() -> Node2D:
 			best_target = enemy_node
 	return best_target
 
+func _can_target_enemy(enemy: Node2D) -> bool:
+	var is_air := _enemy_has_trait(enemy, "air")
+	if damage_tags.has("anti_air"):
+		return is_air
+	if damage_tags.has("blast") and is_air:
+		return false
+	return true
+
 func _get_target_score(enemy: Node2D, distance: float) -> float:
-	var anti_air_bias := 0.0
-	if damage_tags.has("anti_air") and _enemy_has_trait(enemy, "air"):
-		anti_air_bias = -10000.0
 	match targeting_mode:
 		"first":
-			return anti_air_bias - _get_enemy_path_progress(enemy)
+			return -_get_enemy_path_progress(enemy)
 		"last":
-			return anti_air_bias + _get_enemy_path_progress(enemy)
+			return _get_enemy_path_progress(enemy)
 		"strongest":
-			return anti_air_bias - _get_enemy_health(enemy)
+			return -_get_enemy_health(enemy)
 		"weakest":
-			return anti_air_bias + _get_enemy_health(enemy)
+			return _get_enemy_health(enemy)
 		_:
-			return anti_air_bias + distance
+			return distance
 
 func _get_enemy_path_progress(enemy: Node2D) -> float:
 	if enemy.has_method("get_path_progress"):
