@@ -14,8 +14,8 @@ The title connects this game to an earlier project called The Ivory Tower. "Ivor
 
 - One map with fixed enemy paths
 - Grid-based tower placement
-- Four tower types: basic, slow, splash, railgun
-- Six enemy types: standard, fast, armored, shield, siege, decoy
+- Five tower types: basic, slow, splash, railgun, AAA
+- Seven enemy types: standard, fast, armored, shield, siege, decoy, air
 - Ten waves
 - Per-level tower upgrades
 - Between-wave support bonuses
@@ -36,11 +36,12 @@ The title connects this game to an earlier project called The Ivory Tower. "Ivor
 2. Open this folder as a Godot project.
 3. Run the main scene: `res://scenes/Game.tscn`.
 
-The current scaffold includes a code-driven map, placement slots, four tower definitions, six enemy definitions, 10 waves, and basic HUD state.
+The current scaffold includes a code-driven map, placement slots, five tower definitions, seven enemy definitions, 10 waves, and basic HUD state.
 
 ## Current Controls
 
 - Select a tower type from the right-side HUD.
+- New tower types unlock through city support choices or escalating threats.
 - Hover a green build pad to preview the selected tower's range.
 - Click a green build pad to place the selected tower.
 - Click a placed tower to inspect it.
@@ -55,6 +56,7 @@ The HUD shows active and queued enemies remaining for the current wave, plus a p
 The map reserves the right side for UI, so build pads stay in the left playfield.
 Wave starts, wave clears, enemy deaths, and life loss now have simple visual feedback.
 Placeholder procedural sound effects are generated in code for tower fire, enemy death, breaches, wave events, upgrades, sells, victory, and defeat.
+Rotor drones have a procedural helicopter loop while air enemies are approaching or on screen.
 Armored enemies use a distinct top-down tank-style placeholder drawing.
 Shield carriers project a bubble that reduces damage taken by nearby enemies.
 Siege walkers are slow heavy units that cost 2 lives if they breach the exit, while signal decoys are durable low-reward distractions.
@@ -63,8 +65,11 @@ Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sha
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
 Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity.
-Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
-The next-wave preview includes compact enemy composition counts.
+Rivet Turrets are tuned as starter/generalist towers: direct fire is weaker into armored, heavy, and air traits, while Mortars, Railguns, and AAA carry clearer counter roles.
+Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Foam/Mortars do not fire at air.
+Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives start at 12 and are capped at 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
+The next-wave preview shows the upcoming wave name plus compact enemy composition counts.
+Waves are tuned around distinct pressure patterns, including fast rushes, armor columns, shield convoys, air raids, decoy clutter, and mixed final pressure.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 
 ## Windows Export

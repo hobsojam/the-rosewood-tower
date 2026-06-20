@@ -20,7 +20,7 @@ def assert_true(condition, message):
 
 
 def validate_enemies(enemies):
-    required = {"standard", "fast", "armored", "shield", "siege", "decoy"}
+    required = {"standard", "fast", "armored", "shield", "siege", "decoy", "air"}
     assert_true(required.issubset(enemies.keys()), "Missing required enemy definitions")
     for enemy_id, enemy in enemies.items():
         for field in ["name", "health", "speed", "reward", "color"]:
@@ -38,7 +38,7 @@ def validate_enemies(enemies):
 
 
 def validate_towers(towers):
-    required = {"basic", "slow", "splash", "railgun"}
+    required = {"basic", "slow", "splash", "railgun", "aaa"}
     assert_true(required.issubset(towers.keys()), "Missing required tower definitions")
     for tower_id, tower in towers.items():
         for field in ["name", "cost", "damage", "range", "fire_rate", "splash_radius", "slow", "color"]:
@@ -55,10 +55,13 @@ def validate_waves(waves, enemy_ids):
     assert_true(len(waves) == 10, "Expected exactly 10 waves")
     for index, wave in enumerate(waves, start=1):
         assert_true(wave, f"Wave {index} must not be empty")
-        for enemy_id, count in wave.items():
+        assert_true(isinstance(wave.get("name"), str) and wave["name"].strip(), f"Wave {index} needs a name")
+        counts = wave.get("enemies")
+        assert_true(isinstance(counts, dict) and counts, f"Wave {index} needs enemy counts")
+        for enemy_id, count in counts.items():
             assert_true(enemy_id in enemy_ids, f"Wave {index} references unknown enemy {enemy_id}")
             assert_true(isinstance(count, int) and count >= 0, f"Wave {index} count for {enemy_id} must be a non-negative integer")
-        assert_true(sum(wave.values()) > 0, f"Wave {index} must spawn at least one enemy")
+        assert_true(sum(counts.values()) > 0, f"Wave {index} must spawn at least one enemy")
 
 
 def point(value, context):

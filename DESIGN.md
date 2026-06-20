@@ -34,7 +34,9 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
+- AAA flak turret: anti-air counter offered as the required support unlock before air threats appear; only targets air enemies
 - Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
+- Rivets should remain useful starter towers but should not solve armored, heavy, or air threats efficiently on their own.
 
 ### Enemies
 
@@ -44,13 +46,16 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Shield carrier: projects a damage-reducing bubble around nearby enemies
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
+- Rotor drone: air enemy that resists non-anti-air damage and is immune to Foam and Mortar damage; Foam and Mortars do not target it
 - Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
 ### Progression
 
 - Upgrades exist only within a match for the first milestone.
 - Each tower should support at least one upgrade level in the first playable version.
-- Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
+- Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
+- Tower availability can change during a match. Rivets are available at start, most towers can unlock through support choices, and threat-critical counters such as AAA can become the required support choice before their matching threat appears.
+- Waves should have recognizable names and compositions rather than only additive scaling: rush, armor, shield convoy, decoy clutter, air raid, siege, and mixed finale.
 
 ## Godot Architecture
 

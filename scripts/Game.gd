@@ -6,20 +6,31 @@ const WAVE_MANAGER_SCRIPT := preload("res://scripts/WaveManager.gd")
 const AUDIO_MANAGER_SCRIPT := preload("res://scripts/AudioManager.gd")
 const UI_X := 976.0
 const UI_WIDTH := 288.0
-const MAX_LIVES := 20
+const STARTING_LIVES := 12
+const MAX_LIVES := 12
 const RECENT_BONUS_LIMIT := 2
 const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
+const TOWER_ORDER := ["basic", "slow", "splash", "railgun", "aaa"]
+const INITIAL_UNLOCKED_TOWERS := ["basic"]
+const REQUIRED_COUNTER_UNLOCKS := {
+	"air": {"id": "unlock_aaa", "name": "AAA Authorization", "description": "Air threat detected. Unlock AAA Flak Turrets.", "unlock_tower_id": "aaa"}
+}
+const TOWER_UNLOCK_BONUSES := [
+	{"id": "unlock_slow", "name": "Foam Blueprints", "description": "Unlock Foam Sprayers.", "unlock_tower_id": "slow"},
+	{"id": "unlock_splash", "name": "Mortar Crew", "description": "Unlock Foundry Mortars.", "unlock_tower_id": "splash"},
+	{"id": "unlock_railgun", "name": "Rail Schematics", "description": "Unlock Railgun Spires.", "unlock_tower_id": "railgun"}
+]
 const WAVE_BONUSES := [
 	{"id": "budget", "name": "Overtime Budget", "description": "+$75 immediately.", "money": 75},
-	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 3 lives.", "lives": 3},
-	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +15% damage.", "tower_id": "basic", "damage_multiplier": 1.15},
+	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 2 lives.", "lives": 2},
+	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +10% damage.", "tower_id": "basic", "damage_multiplier": 1.1},
 	{"id": "foam_reserve", "name": "Foam Reserves", "description": "Foam towers gain stronger slow.", "tower_id": "slow", "slow_bonus": 0.08},
 	{"id": "mortar_stock", "name": "Mortar Stockpile", "description": "Mortars gain larger blasts.", "tower_id": "splash", "splash_bonus": 14.0},
 	{"id": "rail_calibration", "name": "Rail Calibration", "description": "Railguns gain +18 range.", "tower_id": "railgun", "range_bonus": 18.0}
 ]
 
 var money := 130
-var lives := 20
+var lives := STARTING_LIVES
 var selected_tower_id := "basic"
 var tower_data := {}
 var placed_towers: Array[Node2D] = []
@@ -33,6 +44,7 @@ var active_bonus_choices: Array = []
 var recent_bonus_ids: Array[String] = []
 var tower_bonus_counts := {}
 var tower_match_bonuses := {}
+var unlocked_tower_ids: Array[String] = ["basic"]
 
 var map
 var wave_manager
@@ -89,6 +101,7 @@ func _process(_delta: float) -> void:
 	if map != null:
 		map.set_hovered_slot(get_global_mouse_position())
 		_update_placement_preview()
+	_update_air_audio()
 	_update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -167,7 +180,7 @@ func _create_hud() -> void:
 	next_wave_row.add_theme_constant_override("h_separation", 8)
 	next_wave_row.add_theme_constant_override("v_separation", 2)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege"]:
+	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege", "air"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
 		next_wave_row.add_child(label)
@@ -204,7 +217,7 @@ func _create_hud() -> void:
 	button_grid.add_theme_constant_override("v_separation", 6)
 	layout.add_child(button_grid)
 
-	for tower_id in ["basic", "slow", "splash", "railgun"]:
+	for tower_id in TOWER_ORDER:
 		var button := Button.new()
 		button.text = "%s $%s" % [_get_short_tower_name(tower_id), tower_data[tower_id]["cost"]]
 		button.toggle_mode = true
@@ -245,6 +258,7 @@ func _create_hud() -> void:
 	_create_feedback_overlays()
 	tower_buttons[selected_tower_id].button_pressed = true
 	speed_1x_button.button_pressed = true
+	_update_tower_unlocks()
 
 func _create_bonus_panel() -> void:
 	bonus_panel = PanelContainer.new()
@@ -430,6 +444,8 @@ func _get_short_tower_name(tower_id: String) -> String:
 			return "Mortar"
 		"railgun":
 			return "Rail"
+		"aaa":
+			return "AAA"
 		_:
 			return str(tower_data[tower_id]["name"])
 
@@ -441,6 +457,8 @@ func _get_enemy_icon(enemy_id: String) -> String:
 			return "S"
 		"decoy":
 			return "X"
+		"air":
+			return "A"
 		"armored":
 			return "T"
 		"siege":
@@ -450,6 +468,9 @@ func _get_enemy_icon(enemy_id: String) -> String:
 
 func _try_place_tower(global_pos: Vector2) -> void:
 	if not game_started or wave_manager.game_over:
+		return
+	if not unlocked_tower_ids.has(selected_tower_id):
+		status_label.text = "%s is not unlocked." % tower_data[selected_tower_id]["name"]
 		return
 
 	var slot: Dictionary = map.get_slot_at(global_pos)
@@ -522,6 +543,11 @@ func _update_selection_panel() -> void:
 	selection_panel.visible = true
 
 func _on_tower_type_selected(tower_id: String) -> void:
+	if not unlocked_tower_ids.has(tower_id):
+		status_label.text = "%s is not unlocked." % tower_data[tower_id]["name"]
+		_update_tower_unlocks()
+		return
+
 	selected_tower_id = tower_id
 	for id in tower_buttons:
 		tower_buttons[id].button_pressed = id == tower_id
@@ -574,7 +600,7 @@ func _on_start_wave_pressed() -> void:
 		return
 
 	if wave_manager.start_next_wave():
-		status_label.text = "Wave in progress."
+		status_label.text = "%s in progress." % wave_manager.get_current_wave_name()
 	else:
 		status_label.text = "Wave already active or game finished."
 	_update_hud()
@@ -635,13 +661,15 @@ func _on_wave_started(_wave_number: int) -> void:
 	bonus_pending = false
 	bonus_panel.visible = false
 	_play_sound("wave_start")
-	_show_banner("Wave %s" % _wave_number, Color("#f5c542"))
+	if int(wave_manager.get_current_wave_counts().get("air", 0)) > 0:
+		_play_sound("helicopter_alert")
+	_show_banner("Wave %s: %s" % [_wave_number, wave_manager.get_current_wave_name()], Color("#f5c542"))
 	_update_hud()
 
 func _on_wave_completed(_wave_number: int) -> void:
 	if _wave_number < wave_manager.total_waves:
 		_show_bonus_choices(_wave_number)
-		status_label.text = "Wave cleared. Choose city support."
+		status_label.text = "Air threat detected. Choose the required counter." if _has_required_counter_choice() else "Wave cleared. Choose city support."
 	else:
 		status_label.text = "Wave cleared."
 	_play_sound("wave_clear")
@@ -671,7 +699,7 @@ func _show_bonus_choices(wave_number: int) -> void:
 	bonus_pending = true
 	active_bonus_choices = _get_bonus_choices(wave_number)
 	bonus_panel.visible = true
-	bonus_title_label.text = "Wave %s cleared: choose support" % wave_number
+	bonus_title_label.text = "Air threat detected" if _has_required_counter_choice() else "Wave %s cleared: choose support" % wave_number
 	for index in bonus_buttons.size():
 		var button := bonus_buttons[index]
 		if index >= active_bonus_choices.size():
@@ -682,12 +710,25 @@ func _show_bonus_choices(wave_number: int) -> void:
 		button.text = "%s\n%s" % [bonus["name"], bonus["description"]]
 
 func _get_bonus_choices(wave_number: int) -> Array:
+	var required_counter := _get_required_counter_bonus_for_next_wave()
+	if not required_counter.is_empty():
+		return [required_counter]
+
 	var choices := []
+	_add_unlock_bonus_choices(choices)
 	var start_index: int = wave_number % WAVE_BONUSES.size()
 	_add_bonus_choices(choices, start_index, true)
 	if choices.size() < 3:
 		_add_bonus_choices(choices, start_index, false)
 	return choices
+
+func _add_unlock_bonus_choices(choices: Array) -> void:
+	for bonus in TOWER_UNLOCK_BONUSES:
+		if choices.size() >= 3:
+			return
+		var available_bonus := _get_available_bonus(bonus)
+		if not available_bonus.is_empty():
+			choices.append(available_bonus)
 
 func _add_bonus_choices(choices: Array, start_index: int, avoid_recent: bool) -> void:
 	var bonus_index := start_index
@@ -724,7 +765,12 @@ func _get_available_bonus(bonus: Dictionary) -> Dictionary:
 		available_bonus["lives"] = offered_lives
 		available_bonus["description"] = "+%s %s." % [offered_lives, "life" if offered_lives == 1 else "lives"]
 	elif available_bonus.has("tower_id"):
+		if not unlocked_tower_ids.has(str(available_bonus["tower_id"])):
+			return {}
 		available_bonus = _scale_tower_bonus_offer(available_bonus)
+	elif available_bonus.has("unlock_tower_id"):
+		if unlocked_tower_ids.has(str(available_bonus["unlock_tower_id"])):
+			return {}
 	return available_bonus
 
 func _scale_tower_bonus_offer(bonus: Dictionary) -> Dictionary:
@@ -774,6 +820,9 @@ func _apply_wave_bonus(bonus: Dictionary) -> void:
 	money += int(bonus.get("money", 0))
 	lives = min(lives + int(bonus.get("lives", 0)), MAX_LIVES)
 	_clamp_lives()
+	if bonus.has("unlock_tower_id"):
+		_unlock_tower(str(bonus["unlock_tower_id"]))
+		return
 	if not bonus.has("tower_id"):
 		return
 
@@ -813,9 +862,63 @@ func _remember_bonus_choice(bonus: Dictionary) -> void:
 	while recent_bonus_ids.size() > RECENT_BONUS_LIMIT:
 		recent_bonus_ids.pop_front()
 
+func _has_required_counter_choice() -> bool:
+	for bonus in active_bonus_choices:
+		if str(bonus.get("id", "")) == "unlock_aaa":
+			return true
+	return false
+
+func _get_required_counter_bonus_for_next_wave() -> Dictionary:
+	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
+	for enemy_id in next_counts:
+		if int(next_counts[enemy_id]) <= 0:
+			continue
+		var enemy_definition: Dictionary = wave_manager.enemy_data.get(enemy_id, {})
+		var traits: Array = enemy_definition.get("traits", [])
+		for enemy_trait in traits:
+			if REQUIRED_COUNTER_UNLOCKS.has(str(enemy_trait)):
+				var bonus: Dictionary = REQUIRED_COUNTER_UNLOCKS[str(enemy_trait)]
+				if not unlocked_tower_ids.has(str(bonus["unlock_tower_id"])):
+					return bonus.duplicate()
+	return {}
+
+func _unlock_tower(tower_id: String) -> bool:
+	if not tower_data.has(tower_id) or unlocked_tower_ids.has(tower_id):
+		return false
+	unlocked_tower_ids.append(tower_id)
+	_update_tower_unlocks()
+	return true
+
+func _update_tower_unlocks() -> void:
+	for tower_id in tower_buttons:
+		var button: Button = tower_buttons[tower_id]
+		var unlocked := unlocked_tower_ids.has(tower_id)
+		button.visible = unlocked
+		button.disabled = not unlocked or not game_started or wave_manager.game_over
+		button.button_pressed = unlocked and tower_id == selected_tower_id
+	if not unlocked_tower_ids.has(selected_tower_id):
+		selected_tower_id = "basic"
+		if tower_buttons.has(selected_tower_id):
+			tower_buttons[selected_tower_id].button_pressed = true
+
 func _play_sound(sound_id: String) -> void:
 	if audio_manager != null and audio_manager.has_method("play"):
 		audio_manager.play(sound_id)
+
+func _update_air_audio() -> void:
+	if audio_manager == null or not audio_manager.has_method("set_loop_active") or wave_manager == null:
+		return
+	audio_manager.set_loop_active("helicopter_loop", _has_air_threat())
+
+func _has_air_threat() -> bool:
+	if wave_manager.game_over:
+		return false
+	if wave_manager.get_queued_enemy_count("air") > 0:
+		return true
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and str(enemy.get("enemy_id")) == "air":
+			return true
+	return false
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
@@ -896,14 +999,20 @@ func _update_hud() -> void:
 	_clamp_lives()
 	money_label.text = "Money: $%s" % money
 	lives_label.text = "Lives: %s" % lives
-	wave_label.text = "Wave: %s / %s" % [wave_manager.current_wave + 1, wave_manager.total_waves]
+	var current_wave_number: int = max(wave_manager.current_wave + 1, 0)
+	if current_wave_number > 0:
+		wave_label.text = "Wave %s/%s: %s" % [current_wave_number, wave_manager.total_waves, wave_manager.get_current_wave_name()]
+	else:
+		wave_label.text = "Wave: 0 / %s" % wave_manager.total_waves
 	enemies_label.text = "Enemies remaining: %s" % wave_manager.get_remaining_enemies()
-	next_wave_label.text = "Next wave:"
+	next_wave_label.text = "Next: %s" % wave_manager.get_next_wave_name()
 	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
 	for enemy_id in next_wave_count_labels:
 		next_wave_count_labels[enemy_id].text = "%s: %s" % [_get_enemy_icon(enemy_id), int(next_counts.get(enemy_id, 0))]
 	speed_label.text = "Speed: paused" if game_paused else "Speed: %sx" % int(game_speed)
 	start_button.disabled = not game_started or bonus_pending or wave_manager.game_over or wave_manager.spawning or wave_manager.active_enemies > 0
+	var next_wave_name: String = wave_manager.get_next_wave_name()
+	start_button.text = "Start Wave" if next_wave_name == "None" else "Start %s" % next_wave_name
 	restart_button.disabled = not game_started
 	menu_button.disabled = not game_started
 	settings_button.button_pressed = settings_panel.visible
@@ -915,7 +1024,8 @@ func _update_hud() -> void:
 	pause_button.button_pressed = game_paused
 	pause_button.disabled = not game_started or wave_manager.game_over
 	for tower_id in tower_buttons:
-		tower_buttons[tower_id].disabled = not game_started or wave_manager.game_over
+		tower_buttons[tower_id].disabled = not unlocked_tower_ids.has(tower_id) or not game_started or wave_manager.game_over
+		tower_buttons[tower_id].visible = unlocked_tower_ids.has(tower_id)
 	_update_selection_panel()
 
 func _is_hud_ready() -> bool:

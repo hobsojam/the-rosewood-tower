@@ -1,6 +1,7 @@
 {
-  "basic": {"name": "Rivet Turret", "cost": 45, "damage": 18, "range": 150, "fire_rate": 0.45, "splash_radius": 0, "slow": 0.0, "tags": ["direct"], "color": "#f5c542"},
+  "basic": {"name": "Rivet Turret", "cost": 50, "damage": 16, "range": 140, "fire_rate": 0.52, "splash_radius": 0, "slow": 0.0, "tags": ["direct"], "color": "#f5c542"},
   "slow": {"name": "Foam Sprayer", "cost": 60, "damage": 5, "range": 130, "fire_rate": 0.7, "splash_radius": 0, "slow": 0.45, "tags": ["direct", "slow"], "color": "#67e8f9"},
-  "splash": {"name": "Foundry Mortar", "cost": 85, "damage": 32, "range": 185, "fire_rate": 1.35, "splash_radius": 64, "slow": 0.0, "tags": ["blast"], "color": "#fb7185"},
-  "railgun": {"name": "Railgun Spire", "cost": 120, "damage": 52, "range": 235, "fire_rate": 1.75, "splash_radius": 0, "slow": 0.0, "pierce_width": 16, "tags": ["direct", "pierce"], "color": "#a78bfa"}
+  "splash": {"name": "Foundry Mortar", "cost": 85, "damage": 36, "range": 185, "fire_rate": 1.35, "splash_radius": 70, "slow": 0.0, "tags": ["blast"], "color": "#fb7185"},
+  "railgun": {"name": "Railgun Spire", "cost": 120, "damage": 52, "range": 235, "fire_rate": 1.75, "splash_radius": 0, "slow": 0.0, "pierce_width": 16, "tags": ["direct", "pierce"], "color": "#a78bfa"},
+  "aaa": {"name": "AAA Flak Turret", "cost": 70, "damage": 30, "range": 205, "fire_rate": 0.52, "splash_radius": 0, "slow": 0.0, "tags": ["anti_air"], "color": "#86efac"}
 }
