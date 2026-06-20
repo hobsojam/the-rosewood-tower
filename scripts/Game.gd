@@ -180,7 +180,7 @@ func _create_hud() -> void:
 	next_wave_row.add_theme_constant_override("h_separation", 8)
 	next_wave_row.add_theme_constant_override("v_separation", 2)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "decoy", "shield", "armored", "siege", "air"]:
+	for enemy_id in ["standard", "fast", "decoy", "repair", "shield", "burrower", "armored", "siege", "air"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
 		next_wave_row.add_child(label)
@@ -457,6 +457,10 @@ func _get_enemy_icon(enemy_id: String) -> String:
 			return "S"
 		"decoy":
 			return "X"
+		"repair":
+			return "R"
+		"burrower":
+			return "B"
 		"air":
 			return "A"
 		"armored":

@@ -20,7 +20,7 @@ def assert_true(condition, message):
 
 
 def validate_enemies(enemies):
-    required = {"standard", "fast", "armored", "shield", "siege", "decoy", "air"}
+    required = {"standard", "fast", "armored", "shield", "siege", "decoy", "air", "burrower", "repair"}
     assert_true(required.issubset(enemies.keys()), "Missing required enemy definitions")
     for enemy_id, enemy in enemies.items():
         for field in ["name", "health", "speed", "reward", "color"]:
@@ -34,6 +34,10 @@ def validate_enemies(enemies):
             assert_true(0 <= enemy["shield_reduction"] < 1, f"Enemy {enemy_id} shield reduction must be less than 1")
         if "breach_damage" in enemy:
             assert_true(isinstance(enemy["breach_damage"], int) and enemy["breach_damage"] > 0, f"Enemy {enemy_id} breach damage must be a positive integer")
+        if "repair_radius" in enemy:
+            assert_true(enemy["repair_radius"] > 0, f"Enemy {enemy_id} repair radius must be positive")
+        if "repair_per_second" in enemy:
+            assert_true(enemy["repair_per_second"] > 0, f"Enemy {enemy_id} repair rate must be positive")
         assert_true(isinstance(enemy.get("traits", []), list), f"Enemy {enemy_id} traits must be a list")
 
 

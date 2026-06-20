@@ -4,9 +4,9 @@
   {"name": "Iron Column", "enemies": {"standard": 5, "armored": 4}},
   {"name": "Signal Clutter", "enemies": {"standard": 8, "fast": 6, "decoy": 3}},
   {"name": "Shield Convoy", "enemies": {"standard": 12, "armored": 3, "shield": 2}},
-  {"name": "Overrun Junction", "enemies": {"standard": 6, "fast": 10, "armored": 2, "decoy": 4}},
+  {"name": "Tunnel Works", "enemies": {"standard": 6, "fast": 6, "burrower": 5, "decoy": 2}},
   {"name": "Airspace Breach", "enemies": {"standard": 6, "fast": 4, "air": 7}},
-  {"name": "Siege Line", "enemies": {"standard": 8, "armored": 5, "shield": 2, "siege": 2}},
-  {"name": "Phantom Flight", "enemies": {"fast": 12, "decoy": 6, "air": 5}},
-  {"name": "Rosewood Stand", "enemies": {"standard": 14, "fast": 10, "armored": 6, "shield": 2, "decoy": 4, "siege": 2, "air": 7}}
+  {"name": "Repair Detail", "enemies": {"standard": 6, "armored": 4, "repair": 2, "shield": 1, "siege": 1}},
+  {"name": "Phantom Flight", "enemies": {"fast": 10, "decoy": 5, "air": 5, "repair": 1}},
+  {"name": "Rosewood Stand", "enemies": {"standard": 14, "fast": 8, "armored": 6, "shield": 2, "decoy": 3, "burrower": 4, "repair": 2, "siege": 2, "air": 7}}
 ]
