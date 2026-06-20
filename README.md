@@ -6,6 +6,10 @@ A Windows-native tower defence game built with Godot 4 and GDScript.
 
 The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial district. The player protects critical city infrastructure by placing defensive towers along fixed enemy routes and surviving escalating waves.
 
+## Name
+
+The title connects this game to an earlier project called The Ivory Tower. "Ivory tower" nods at the solo-developer idea of building in isolation; "rosewood" points to the black keys of a piano, which are often associated with rosewood, making this a companion name rather than a literal tower.
+
 ## First Playable Scope
 
 - One map with fixed enemy paths
