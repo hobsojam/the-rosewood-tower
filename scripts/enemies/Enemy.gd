@@ -123,6 +123,9 @@ func _get_effective_damage(amount: float, damage_tags: Array[String], shield_red
 	return amount * _get_trait_damage_multiplier(damage_tags) * (1.0 - strongest_reduction)
 
 func get_incoming_shield_reduction() -> float:
+	if enemy_id == "shield":
+		return 0.0
+
 	var strongest_reduction := 0.0
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		var shield_enemy := enemy as Node2D
