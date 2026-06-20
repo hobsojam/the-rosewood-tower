@@ -660,6 +660,8 @@ func _on_wave_started(_wave_number: int) -> void:
 	bonus_pending = false
 	bonus_panel.visible = false
 	_play_sound("wave_start")
+	if int(wave_manager.get_current_wave_counts().get("air", 0)) > 0:
+		_play_sound("helicopter_alert")
 	_show_banner("Wave %s" % _wave_number, Color("#f5c542"))
 	_update_hud()
 

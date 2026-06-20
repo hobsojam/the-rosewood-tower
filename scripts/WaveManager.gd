@@ -164,3 +164,8 @@ func get_next_wave_counts() -> Dictionary:
 	if next_index >= waves.size():
 		return {}
 	return waves[next_index]
+
+func get_current_wave_counts() -> Dictionary:
+	if current_wave < 0 or current_wave >= waves.size():
+		return {}
+	return waves[current_wave]
