@@ -11,7 +11,9 @@ const RECENT_BONUS_LIMIT := 2
 const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
 const TOWER_ORDER := ["basic", "slow", "splash", "railgun", "aaa"]
 const INITIAL_UNLOCKED_TOWERS := ["basic"]
-const AUTO_UNLOCK_ENEMY_TRAITS := {"air": "aaa"}
+const REQUIRED_COUNTER_UNLOCKS := {
+	"air": {"id": "unlock_aaa", "name": "AAA Authorization", "description": "Air threat detected. Unlock AAA Flak Turrets.", "unlock_tower_id": "aaa"}
+}
 const TOWER_UNLOCK_BONUSES := [
 	{"id": "unlock_slow", "name": "Foam Blueprints", "description": "Unlock Foam Sprayers.", "unlock_tower_id": "slow"},
 	{"id": "unlock_splash", "name": "Mortar Crew", "description": "Unlock Foundry Mortars.", "unlock_tower_id": "splash"},
@@ -661,10 +663,9 @@ func _on_wave_started(_wave_number: int) -> void:
 	_update_hud()
 
 func _on_wave_completed(_wave_number: int) -> void:
-	var unlocked_for_threat := _unlock_required_counters_for_next_wave()
 	if _wave_number < wave_manager.total_waves:
 		_show_bonus_choices(_wave_number)
-		status_label.text = "Air threat detected. AAA unlocked. Choose city support." if unlocked_for_threat else "Wave cleared. Choose city support."
+		status_label.text = "Air threat detected. Choose the required counter." if _has_required_counter_choice() else "Wave cleared. Choose city support."
 	else:
 		status_label.text = "Wave cleared."
 	_play_sound("wave_clear")
@@ -694,7 +695,7 @@ func _show_bonus_choices(wave_number: int) -> void:
 	bonus_pending = true
 	active_bonus_choices = _get_bonus_choices(wave_number)
 	bonus_panel.visible = true
-	bonus_title_label.text = "Wave %s cleared: choose support" % wave_number
+	bonus_title_label.text = "Air threat detected" if _has_required_counter_choice() else "Wave %s cleared: choose support" % wave_number
 	for index in bonus_buttons.size():
 		var button := bonus_buttons[index]
 		if index >= active_bonus_choices.size():
@@ -705,6 +706,10 @@ func _show_bonus_choices(wave_number: int) -> void:
 		button.text = "%s\n%s" % [bonus["name"], bonus["description"]]
 
 func _get_bonus_choices(wave_number: int) -> Array:
+	var required_counter := _get_required_counter_bonus_for_next_wave()
+	if not required_counter.is_empty():
+		return [required_counter]
+
 	var choices := []
 	_add_unlock_bonus_choices(choices)
 	var start_index: int = wave_number % WAVE_BONUSES.size()
@@ -853,6 +858,26 @@ func _remember_bonus_choice(bonus: Dictionary) -> void:
 	while recent_bonus_ids.size() > RECENT_BONUS_LIMIT:
 		recent_bonus_ids.pop_front()
 
+func _has_required_counter_choice() -> bool:
+	for bonus in active_bonus_choices:
+		if str(bonus.get("id", "")) == "unlock_aaa":
+			return true
+	return false
+
+func _get_required_counter_bonus_for_next_wave() -> Dictionary:
+	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
+	for enemy_id in next_counts:
+		if int(next_counts[enemy_id]) <= 0:
+			continue
+		var enemy_definition: Dictionary = wave_manager.enemy_data.get(enemy_id, {})
+		var traits: Array = enemy_definition.get("traits", [])
+		for enemy_trait in traits:
+			if REQUIRED_COUNTER_UNLOCKS.has(str(enemy_trait)):
+				var bonus: Dictionary = REQUIRED_COUNTER_UNLOCKS[str(enemy_trait)]
+				if not unlocked_tower_ids.has(str(bonus["unlock_tower_id"])):
+					return bonus.duplicate()
+	return {}
+
 func _unlock_tower(tower_id: String) -> bool:
 	if not tower_data.has(tower_id) or unlocked_tower_ids.has(tower_id):
 		return false
@@ -871,19 +896,6 @@ func _update_tower_unlocks() -> void:
 		selected_tower_id = "basic"
 		if tower_buttons.has(selected_tower_id):
 			tower_buttons[selected_tower_id].button_pressed = true
-
-func _unlock_required_counters_for_next_wave() -> bool:
-	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
-	var unlocked_any := false
-	for enemy_id in next_counts:
-		if int(next_counts[enemy_id]) <= 0:
-			continue
-		var enemy_definition: Dictionary = wave_manager.enemy_data.get(enemy_id, {})
-		var traits: Array = enemy_definition.get("traits", [])
-		for enemy_trait in traits:
-			if AUTO_UNLOCK_ENEMY_TRAITS.has(str(enemy_trait)):
-				unlocked_any = _unlock_tower(str(AUTO_UNLOCK_ENEMY_TRAITS[str(enemy_trait)])) or unlocked_any
-	return unlocked_any
 
 func _play_sound(sound_id: String) -> void:
 	if audio_manager != null and audio_manager.has_method("play"):
