@@ -6,7 +6,8 @@ const WAVE_MANAGER_SCRIPT := preload("res://scripts/WaveManager.gd")
 const AUDIO_MANAGER_SCRIPT := preload("res://scripts/AudioManager.gd")
 const UI_X := 976.0
 const UI_WIDTH := 288.0
-const MAX_LIVES := 20
+const STARTING_LIVES := 12
+const MAX_LIVES := 12
 const RECENT_BONUS_LIMIT := 2
 const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
 const TOWER_ORDER := ["basic", "slow", "splash", "railgun", "aaa"]
@@ -21,7 +22,7 @@ const TOWER_UNLOCK_BONUSES := [
 ]
 const WAVE_BONUSES := [
 	{"id": "budget", "name": "Overtime Budget", "description": "+$75 immediately.", "money": 75},
-	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 3 lives.", "lives": 3},
+	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 2 lives.", "lives": 2},
 	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +10% damage.", "tower_id": "basic", "damage_multiplier": 1.1},
 	{"id": "foam_reserve", "name": "Foam Reserves", "description": "Foam towers gain stronger slow.", "tower_id": "slow", "slow_bonus": 0.08},
 	{"id": "mortar_stock", "name": "Mortar Stockpile", "description": "Mortars gain larger blasts.", "tower_id": "splash", "splash_bonus": 14.0},
@@ -29,7 +30,7 @@ const WAVE_BONUSES := [
 ]
 
 var money := 130
-var lives := 20
+var lives := STARTING_LIVES
 var selected_tower_id := "basic"
 var tower_data := {}
 var placed_towers: Array[Node2D] = []
