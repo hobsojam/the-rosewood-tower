@@ -6,9 +6,10 @@ const WAVE_MANAGER_SCRIPT := preload("res://scripts/WaveManager.gd")
 const AUDIO_MANAGER_SCRIPT := preload("res://scripts/AudioManager.gd")
 const UI_X := 976.0
 const UI_WIDTH := 288.0
+const MAX_LIVES := 20
 const WAVE_BONUSES := [
 	{"id": "budget", "name": "Overtime Budget", "description": "+$75 immediately.", "money": 75},
-	{"id": "repairs", "name": "Emergency Repairs", "description": "+3 lives.", "lives": 3},
+	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 3 lives.", "lives": 3},
 	{"id": "rivet_damage", "name": "Reinforced Rivets", "description": "Rivet towers gain +15% damage.", "tower_id": "basic", "damage_multiplier": 1.15},
 	{"id": "foam_reserve", "name": "Foam Reserves", "description": "Foam towers gain stronger slow.", "tower_id": "slow", "slow_bonus": 0.08},
 	{"id": "mortar_stock", "name": "Mortar Stockpile", "description": "Mortars gain larger blasts.", "tower_id": "splash", "splash_bonus": 14.0},
@@ -613,10 +614,10 @@ func _on_enemy_died(reward: int) -> void:
 
 func _on_enemy_reached_exit(breach_damage: int) -> void:
 	lives -= breach_damage
+	_clamp_lives()
 	_play_sound("breach")
 	_pulse_breach_flash()
 	if lives <= 0:
-		lives = 0
 		wave_manager.stop_game()
 		status_label.text = "City grid breached. Defeat."
 		_play_sound("defeat")
@@ -676,9 +677,25 @@ func _show_bonus_choices(wave_number: int) -> void:
 func _get_bonus_choices(wave_number: int) -> Array:
 	var choices := []
 	var start_index: int = wave_number % WAVE_BONUSES.size()
-	for offset in range(3):
-		choices.append(WAVE_BONUSES[(start_index + offset * 2) % WAVE_BONUSES.size()])
+	var bonus_index := start_index
+	while choices.size() < 3 and bonus_index < start_index + WAVE_BONUSES.size():
+		var bonus: Dictionary = WAVE_BONUSES[bonus_index % WAVE_BONUSES.size()]
+		var available_bonus := _get_available_bonus(bonus)
+		if not available_bonus.is_empty():
+			choices.append(available_bonus)
+		bonus_index += 1
 	return choices
+
+func _get_available_bonus(bonus: Dictionary) -> Dictionary:
+	var available_bonus := bonus.duplicate()
+	if available_bonus.has("lives"):
+		var missing_lives: int = MAX_LIVES - lives
+		if missing_lives <= 0:
+			return {}
+		var offered_lives: int = min(int(available_bonus["lives"]), missing_lives)
+		available_bonus["lives"] = offered_lives
+		available_bonus["description"] = "+%s %s." % [offered_lives, "life" if offered_lives == 1 else "lives"]
+	return available_bonus
 
 func _on_bonus_pressed(index: int) -> void:
 	if not bonus_pending or index < 0 or index >= active_bonus_choices.size():
@@ -694,7 +711,8 @@ func _on_bonus_pressed(index: int) -> void:
 
 func _apply_wave_bonus(bonus: Dictionary) -> void:
 	money += int(bonus.get("money", 0))
-	lives += int(bonus.get("lives", 0))
+	lives = min(lives + int(bonus.get("lives", 0)), MAX_LIVES)
+	_clamp_lives()
 	if not bonus.has("tower_id"):
 		return
 
@@ -805,6 +823,7 @@ func _update_placement_preview() -> void:
 func _update_hud() -> void:
 	if not _is_hud_ready():
 		return
+	_clamp_lives()
 	money_label.text = "Money: $%s" % money
 	lives_label.text = "Lives: %s" % lives
 	wave_label.text = "Wave: %s / %s" % [wave_manager.current_wave + 1, wave_manager.total_waves]
@@ -847,3 +866,6 @@ func _is_hud_ready() -> bool:
 		and mute_button != null \
 		and map_label != null \
 		and next_map_button != null
+
+func _clamp_lives() -> void:
+	lives = clampi(lives, 0, MAX_LIVES)
