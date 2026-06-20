@@ -19,6 +19,7 @@ var fire_rate := 0.5
 var splash_radius := 0.0
 var slow := 0.0
 var pierce_width := 0.0
+var damage_tags: Array[String] = []
 var body_color := Color("#f5c542")
 var cooldown := 0.0
 var cost := 0
@@ -40,8 +41,15 @@ func configure(id: String, data: Dictionary) -> void:
 	splash_radius = float(data["splash_radius"])
 	slow = float(data["slow"])
 	pierce_width = float(data.get("pierce_width", 0.0))
+	damage_tags = _to_string_array(data.get("tags", []))
 	body_color = Color.html(str(data["color"]))
 	cost = int(data["cost"])
+
+func _to_string_array(values: Array) -> Array[String]:
+	var strings: Array[String] = []
+	for value in values:
+		strings.append(str(value))
+	return strings
 
 func _process(delta: float) -> void:
 	cooldown -= delta
@@ -212,7 +220,7 @@ func _fire_at(target) -> void:
 		return
 
 	var projectile = PROJECTILE_SCENE.instantiate()
-	projectile.configure(target, damage, splash_radius, slow, body_color)
+	projectile.configure(target, damage, splash_radius, slow, body_color, damage_tags)
 	projectile.global_position = global_position
 	get_tree().current_scene.add_child(projectile)
 	var audio_manager := get_tree().current_scene.get_node_or_null("AudioManager")
@@ -234,7 +242,7 @@ func _fire_railgun_at(target: Node2D) -> void:
 			continue
 		if _distance_to_segment(enemy_node.global_position, beam_start, beam_end) <= pierce_width:
 			if enemy_node.has_method("take_damage"):
-				enemy_node.take_damage(damage, slow, 1.2)
+				enemy_node.take_damage(damage, slow, 1.2, damage_tags)
 
 	_show_rail_beam(beam_end)
 	var audio_manager := get_tree().current_scene.get_node_or_null("AudioManager")

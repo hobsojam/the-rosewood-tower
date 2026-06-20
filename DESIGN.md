@@ -34,6 +34,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
+- Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
 
 ### Enemies
 
@@ -43,6 +44,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Shield carrier: projects a damage-reducing bubble around nearby enemies
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
+- Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
 ### Progression
 

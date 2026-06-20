@@ -12,6 +12,7 @@ var health := 1.0
 var base_speed := 80.0
 var reward := 1
 var breach_damage := 1
+var traits: Array[String] = []
 var shield_radius := 0.0
 var shield_reduction := 0.0
 var path_points := []
@@ -37,10 +38,17 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	base_speed = float(data["speed"])
 	reward = int(data["reward"])
 	breach_damage = int(data.get("breach_damage", 1))
+	traits = _to_string_array(data.get("traits", []))
 	shield_radius = float(data.get("shield_radius", 0.0))
 	shield_reduction = float(data.get("shield_reduction", 0.0))
 	body_color = Color.html(str(data["color"]))
 	path_points = path.duplicate()
+
+func _to_string_array(values: Array) -> Array[String]:
+	var strings: Array[String] = []
+	for value in values:
+		strings.append(str(value))
+	return strings
 
 func _process(delta: float) -> void:
 	if finished or path_points.size() < 2:
@@ -72,11 +80,11 @@ func _process(delta: float) -> void:
 	else:
 		global_position += direction.normalized() * step
 
-func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0) -> void:
+func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0, damage_tags: Array[String] = []) -> void:
 	if finished:
 		return
 
-	health -= _get_effective_damage(amount)
+	health -= _get_effective_damage(amount, damage_tags)
 	hit_flash_time = 0.08
 	if slow > 0.0:
 		slow_multiplier = clamp(1.0 - slow, 0.2, 1.0)
@@ -104,22 +112,32 @@ func get_path_progress() -> float:
 	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
 	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
 
-func _get_effective_damage(amount: float) -> float:
-	if enemy_id == "shield":
-		return amount
-
+func _get_effective_damage(amount: float, damage_tags: Array[String]) -> float:
 	var strongest_reduction := 0.0
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		var shield_enemy := enemy as Node2D
-		if shield_enemy == null or shield_enemy == self or not is_instance_valid(shield_enemy):
-			continue
-		if not shield_enemy.has_method("get_shield_reduction"):
-			continue
+	if enemy_id != "shield":
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			var shield_enemy := enemy as Node2D
+			if shield_enemy == null or shield_enemy == self or not is_instance_valid(shield_enemy):
+				continue
+			if not shield_enemy.has_method("get_shield_reduction"):
+				continue
 
-		var reduction: float = shield_enemy.get_shield_reduction(global_position)
-		strongest_reduction = max(strongest_reduction, reduction)
+			var reduction: float = shield_enemy.get_shield_reduction(global_position)
+			strongest_reduction = max(strongest_reduction, reduction)
 
-	return amount * (1.0 - strongest_reduction)
+	return amount * _get_trait_damage_multiplier(damage_tags) * (1.0 - strongest_reduction)
+
+func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
+	var multiplier := 1.0
+	if traits.has("air") and not damage_tags.has("anti_air"):
+		multiplier *= 0.35
+	if traits.has("burrowed") and not damage_tags.has("blast"):
+		multiplier *= 0.45
+	if traits.has("armored") and damage_tags.has("pierce"):
+		multiplier *= 1.15
+	if traits.has("heavy") and damage_tags.has("blast"):
+		multiplier *= 1.1
+	return multiplier
 
 func get_shield_reduction(point: Vector2) -> float:
 	if finished or shield_radius <= 0.0:
