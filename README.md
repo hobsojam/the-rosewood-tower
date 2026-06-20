@@ -14,6 +14,7 @@ The Rosewood Tower is a top-down 2D tower defence game set in a dense industrial
 - Six enemy types: standard, fast, armored, shield, siege, decoy
 - Ten waves
 - Per-level tower upgrades
+- Between-wave support bonuses
 - Mouse-first controls
 - Basic UI for money, lives, wave state, and selected tower
 - Win and lose states
@@ -41,6 +42,7 @@ The current scaffold includes a code-driven map, placement slots, four tower def
 - Click a placed tower to inspect it.
 - Use the selected tower panel to cycle targeting, upgrade, or sell it.
 - Press Start Wave to launch the next wave.
+- Choose one city support bonus after each cleared non-final wave.
 - Use Pause, 1x, and 2x to control game speed during playtests.
 - Use Settings to adjust procedural sound volume or mute audio.
 - Use Restart on the victory/defeat overlay to reset the match.
@@ -56,7 +58,9 @@ Standard and fast enemies now have distinct crawler/drone silhouettes, and each 
 Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
-The next-wave preview includes compact C/D/T counts for crawler, drone, and tank enemies.
+Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity.
+Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
+The next-wave preview includes compact enemy composition counts.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 
 ## Windows Export

@@ -16,7 +16,8 @@ The game is set in an industrial city district of service roads, rail sidings, p
 4. Towers attack enemies automatically.
 5. Defeated enemies award currency.
 6. Enemies that reach the exit reduce lives.
-7. Player wins after wave 10 or loses when lives reach zero.
+7. After each cleared non-final wave, the player chooses one city support bonus.
+8. Player wins after wave 10 or loses when lives reach zero.
 
 ## Initial Mechanics
 
@@ -33,6 +34,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Cryo/foam sprayer: low damage, applies slow
 - Mortar: slower fire rate, splash damage
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
+- Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
 
 ### Enemies
 
@@ -42,11 +44,13 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Shield carrier: projects a damage-reducing bubble around nearby enemies
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
+- Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
 ### Progression
 
 - Upgrades exist only within a match for the first milestone.
 - Each tower should support at least one upgrade level in the first playable version.
+- Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 
 ## Godot Architecture
 
