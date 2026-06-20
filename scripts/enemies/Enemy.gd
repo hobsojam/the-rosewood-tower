@@ -84,9 +84,11 @@ func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0, d
 	if finished:
 		return
 
-	health -= _get_effective_damage(amount, damage_tags)
-	hit_flash_time = 0.08
-	if slow > 0.0:
+	var effective_damage := _get_effective_damage(amount, damage_tags)
+	health -= effective_damage
+	if effective_damage > 0.0:
+		hit_flash_time = 0.08
+	if slow > 0.0 and effective_damage > 0.0:
 		slow_multiplier = clamp(1.0 - slow, 0.2, 1.0)
 		slow_time = slow_duration
 
@@ -129,6 +131,8 @@ func _get_effective_damage(amount: float, damage_tags: Array[String]) -> float:
 
 func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
 	var multiplier := 1.0
+	if traits.has("air") and (damage_tags.has("slow") or damage_tags.has("blast")):
+		return 0.0
 	if traits.has("air") and not damage_tags.has("anti_air"):
 		multiplier *= 0.35
 	if not traits.has("air") and damage_tags.has("anti_air"):

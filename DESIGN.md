@@ -45,7 +45,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Shield carrier: projects a damage-reducing bubble around nearby enemies
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
-- Rotor drone: air enemy that resists non-anti-air damage
+- Rotor drone: air enemy that resists non-anti-air damage and is immune to Foam and Mortar damage
 - Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
 ### Progression
