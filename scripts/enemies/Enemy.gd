@@ -124,18 +124,17 @@ func _get_effective_damage(amount: float, damage_tags: Array[String], shield_red
 
 func get_incoming_shield_reduction() -> float:
 	var strongest_reduction := 0.0
-	if enemy_id != "shield":
-		for enemy in get_tree().get_nodes_in_group("enemies"):
-			var shield_enemy := enemy as Node2D
-			if shield_enemy == null or shield_enemy == self or not is_instance_valid(shield_enemy):
-				continue
-			if not shield_enemy.has_method("get_shield_reduction"):
-				continue
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		var shield_enemy := enemy as Node2D
+		if shield_enemy == null or not is_instance_valid(shield_enemy):
+			continue
+		if not shield_enemy.has_method("get_shield_reduction"):
+			continue
 
-			var reduction: float = shield_enemy.get_shield_reduction(global_position)
-			if reduction > 0.0 and shield_enemy.has_method("flash_shield_absorb"):
-				shield_enemy.flash_shield_absorb()
-			strongest_reduction = max(strongest_reduction, reduction)
+		var reduction: float = shield_enemy.get_shield_reduction(global_position)
+		if reduction > 0.0 and shield_enemy.has_method("flash_shield_absorb"):
+			shield_enemy.flash_shield_absorb()
+		strongest_reduction = max(strongest_reduction, reduction)
 	return strongest_reduction
 
 func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
