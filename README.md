@@ -65,6 +65,7 @@ Rivet Turrets are tuned as starter/generalist towers: direct fire is weaker into
 Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Foam/Mortars do not fire at air.
 Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives start at 12 and are capped at 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 The next-wave preview includes compact enemy composition counts.
+Waves are tuned around distinct pressure patterns, including fast rushes, armor columns, shield convoys, air raids, decoy clutter, and mixed final pressure.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 
 ## Windows Export
