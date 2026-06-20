@@ -213,8 +213,6 @@ func _create_hud() -> void:
 	start_button.pressed.connect(_on_start_wave_pressed)
 	layout.add_child(start_button)
 
-	_create_bonus_panel(layout)
-
 	var menu_row := HBoxContainer.new()
 	menu_row.add_theme_constant_override("separation", 6)
 	layout.add_child(menu_row)
@@ -235,6 +233,7 @@ func _create_hud() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 	layout.add_child(settings_button)
 
+	_create_bonus_panel()
 	_create_settings_panel(layout)
 	_create_selection_panel(layout)
 	_create_overlay_panel()
@@ -243,21 +242,25 @@ func _create_hud() -> void:
 	tower_buttons[selected_tower_id].button_pressed = true
 	speed_1x_button.button_pressed = true
 
-func _create_bonus_panel(parent: VBoxContainer) -> void:
+func _create_bonus_panel() -> void:
 	bonus_panel = PanelContainer.new()
-	bonus_panel.custom_minimum_size = Vector2(UI_WIDTH, 150)
-	parent.add_child(bonus_panel)
+	bonus_panel.position = Vector2(252, 226)
+	bonus_panel.custom_minimum_size = Vector2(456, 230)
+	hud_layer.add_child(bonus_panel)
 
 	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 6)
+	layout.alignment = BoxContainer.ALIGNMENT_CENTER
+	layout.add_theme_constant_override("separation", 10)
 	bonus_panel.add_child(layout)
 
 	bonus_title_label = Label.new()
 	bonus_title_label.text = "City support available"
+	bonus_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(bonus_title_label)
 
 	for index in range(3):
 		var button := Button.new()
+		button.custom_minimum_size = Vector2(420, 46)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.pressed.connect(_on_bonus_pressed.bind(index))
 		layout.add_child(button)
@@ -801,7 +804,7 @@ func _pulse_breach_flash() -> void:
 
 func _is_pointer_over_ui() -> bool:
 	var mouse_pos := get_viewport().get_mouse_position()
-	for panel in [hud_panel, selection_panel, settings_panel, overlay_panel, title_panel]:
+	for panel in [hud_panel, bonus_panel, selection_panel, settings_panel, overlay_panel, title_panel]:
 		if panel != null and panel.visible and panel.get_global_rect().has_point(mouse_pos):
 			return true
 	return false
