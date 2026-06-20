@@ -4,6 +4,6 @@
   "armored": {"name": "Armored Hauler", "health": 210, "speed": 50, "reward": 16, "traits": ["armored"], "color": "#f59e0b"},
   "shield": {"name": "Shield Carrier", "health": 135, "speed": 62, "reward": 18, "traits": ["support"], "shield_radius": 92, "shield_reduction": 0.55, "color": "#38bdf8"},
   "siege": {"name": "Siege Walker", "health": 420, "speed": 38, "reward": 30, "traits": ["armored", "heavy"], "breach_damage": 2, "color": "#ef4444"},
-  "decoy": {"name": "Signal Decoy", "health": 170, "speed": 110, "reward": 3, "traits": ["decoy"], "color": "#f472b6"},
+  "decoy": {"name": "Signal Decoy", "health": 260, "speed": 62, "reward": 3, "traits": ["decoy"], "color": "#f472b6"},
   "air": {"name": "Rotor Drone", "health": 95, "speed": 135, "reward": 18, "traits": ["air"], "color": "#a7f3d0"}
 }
