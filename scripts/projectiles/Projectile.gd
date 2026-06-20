@@ -34,9 +34,21 @@ func _process(delta: float) -> void:
 
 func _impact() -> void:
 	if splash_radius > 0.0:
+		var splash_hits: Array[Dictionary] = []
 		for enemy in get_tree().get_nodes_in_group("enemies"):
-			if is_instance_valid(enemy) and global_position.distance_to(enemy.global_position) <= splash_radius:
-				enemy.take_damage(damage, slow, 1.2, damage_tags)
+			var enemy_node := enemy as Node2D
+			if enemy_node == null or not is_instance_valid(enemy_node):
+				continue
+			if global_position.distance_to(enemy_node.global_position) > splash_radius:
+				continue
+			var shield_reduction := 0.0
+			if enemy_node.has_method("get_incoming_shield_reduction"):
+				shield_reduction = float(enemy_node.get_incoming_shield_reduction())
+			splash_hits.append({"enemy": enemy_node, "shield_reduction": shield_reduction})
+		for splash_hit in splash_hits:
+			var hit_enemy := splash_hit["enemy"] as Node2D
+			if hit_enemy != null and is_instance_valid(hit_enemy):
+				hit_enemy.take_damage(damage, slow, 1.2, damage_tags, float(splash_hit["shield_reduction"]))
 		_show_impact_ring()
 	else:
 		if is_instance_valid(target):

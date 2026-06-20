@@ -21,6 +21,7 @@ var slow_multiplier := 1.0
 var slow_time := 0.0
 var body_color := Color.WHITE
 var hit_flash_time := 0.0
+var shield_absorb_flash_time := 0.0
 var finished := false
 var facing_angle := 0.0
 
@@ -62,6 +63,9 @@ func _process(delta: float) -> void:
 	if hit_flash_time > 0.0:
 		hit_flash_time -= delta
 		queue_redraw()
+	if shield_absorb_flash_time > 0.0:
+		shield_absorb_flash_time -= delta
+		queue_redraw()
 
 	var target: Vector2 = path_points[path_index + 1]
 	var direction: Vector2 = target - global_position
@@ -80,11 +84,11 @@ func _process(delta: float) -> void:
 	else:
 		global_position += direction.normalized() * step
 
-func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0, damage_tags: Array[String] = []) -> void:
+func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0, damage_tags: Array[String] = [], shield_reduction_override: float = -1.0) -> void:
 	if finished:
 		return
 
-	var effective_damage := _get_effective_damage(amount, damage_tags)
+	var effective_damage := _get_effective_damage(amount, damage_tags, shield_reduction_override)
 	health -= effective_damage
 	if effective_damage > 0.0:
 		hit_flash_time = 0.08
@@ -114,7 +118,11 @@ func get_path_progress() -> float:
 	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
 	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
 
-func _get_effective_damage(amount: float, damage_tags: Array[String]) -> float:
+func _get_effective_damage(amount: float, damage_tags: Array[String], shield_reduction_override: float = -1.0) -> float:
+	var strongest_reduction := shield_reduction_override if shield_reduction_override >= 0.0 else get_incoming_shield_reduction()
+	return amount * _get_trait_damage_multiplier(damage_tags) * (1.0 - strongest_reduction)
+
+func get_incoming_shield_reduction() -> float:
 	var strongest_reduction := 0.0
 	if enemy_id != "shield":
 		for enemy in get_tree().get_nodes_in_group("enemies"):
@@ -125,9 +133,10 @@ func _get_effective_damage(amount: float, damage_tags: Array[String]) -> float:
 				continue
 
 			var reduction: float = shield_enemy.get_shield_reduction(global_position)
+			if reduction > 0.0 and shield_enemy.has_method("flash_shield_absorb"):
+				shield_enemy.flash_shield_absorb()
 			strongest_reduction = max(strongest_reduction, reduction)
-
-	return amount * _get_trait_damage_multiplier(damage_tags) * (1.0 - strongest_reduction)
+	return strongest_reduction
 
 func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
 	var multiplier := 1.0
@@ -155,6 +164,10 @@ func get_shield_reduction(point: Vector2) -> float:
 	if global_position.distance_to(point) > shield_radius:
 		return 0.0
 	return shield_reduction
+
+func flash_shield_absorb() -> void:
+	shield_absorb_flash_time = 0.18
+	queue_redraw()
 
 func _spawn_death_pop() -> void:
 	var pop := Node2D.new()
@@ -224,8 +237,13 @@ func _draw_armored_enemy(color: Color) -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _draw_shield_enemy(color: Color) -> void:
-	draw_circle(Vector2.ZERO, shield_radius, Color(0.22, 0.72, 0.95, 0.08))
-	draw_circle(Vector2.ZERO, shield_radius, Color(0.56, 0.84, 1.0, 0.28), false, 2.0)
+	var bubble_fill := Color(0.22, 0.72, 0.95, 0.08)
+	var bubble_outline := Color(0.56, 0.84, 1.0, 0.28)
+	if shield_absorb_flash_time > 0.0:
+		bubble_fill = Color(0.95, 0.1, 0.08, 0.18)
+		bubble_outline = Color(1.0, 0.28, 0.18, 0.72)
+	draw_circle(Vector2.ZERO, shield_radius, bubble_fill)
+	draw_circle(Vector2.ZERO, shield_radius, bubble_outline, false, 2.0)
 	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
 	draw_rect(Rect2(Vector2(-14, -13), Vector2(28, 26)), Color("#0f172a"))
 	draw_rect(Rect2(Vector2(-11, -10), Vector2(22, 20)), color)
