@@ -62,7 +62,7 @@ Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
 Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity.
 Rivet Turrets are tuned as starter/generalist towers: direct fire is weaker into armored, heavy, and air traits, while Mortars, Railguns, and AAA carry clearer counter roles.
-Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Mortars do not fire at air.
+Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Foam/Mortars do not fire at air.
 Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 The next-wave preview includes compact enemy composition counts.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.

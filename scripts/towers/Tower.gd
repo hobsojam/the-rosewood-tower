@@ -87,7 +87,7 @@ func _can_target_enemy(enemy: Node2D) -> bool:
 	var is_air := _enemy_has_trait(enemy, "air")
 	if damage_tags.has("anti_air"):
 		return is_air
-	if damage_tags.has("blast") and is_air:
+	if is_air and (damage_tags.has("blast") or damage_tags.has("slow")):
 		return false
 	return true
 
