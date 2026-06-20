@@ -48,7 +48,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 
 - Upgrades exist only within a match for the first milestone.
 - Each tower should support at least one upgrade level in the first playable version.
-- Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 20.
+- Between-wave city support choices grant money, repairs, or tower-specific match bonuses. Lives are clamped between 0 and 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 
 ## Godot Architecture
 

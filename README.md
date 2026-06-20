@@ -58,7 +58,7 @@ Standard and fast enemies now have distinct crawler/drone silhouettes, and each 
 Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
-Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20.
+Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives are capped at 20, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 The next-wave preview includes compact enemy composition counts.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 

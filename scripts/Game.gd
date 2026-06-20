@@ -7,6 +7,8 @@ const AUDIO_MANAGER_SCRIPT := preload("res://scripts/AudioManager.gd")
 const UI_X := 976.0
 const UI_WIDTH := 288.0
 const MAX_LIVES := 20
+const RECENT_BONUS_LIMIT := 2
+const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
 const WAVE_BONUSES := [
 	{"id": "budget", "name": "Overtime Budget", "description": "+$75 immediately.", "money": 75},
 	{"id": "repairs", "name": "Emergency Repairs", "description": "Recover up to 3 lives.", "lives": 3},
@@ -28,6 +30,8 @@ var game_started := false
 var selected_map_index := 0
 var bonus_pending := false
 var active_bonus_choices: Array = []
+var recent_bonus_ids: Array[String] = []
+var tower_bonus_counts := {}
 var tower_match_bonuses := {}
 
 var map
@@ -680,14 +684,35 @@ func _show_bonus_choices(wave_number: int) -> void:
 func _get_bonus_choices(wave_number: int) -> Array:
 	var choices := []
 	var start_index: int = wave_number % WAVE_BONUSES.size()
+	_add_bonus_choices(choices, start_index, true)
+	if choices.size() < 3:
+		_add_bonus_choices(choices, start_index, false)
+	return choices
+
+func _add_bonus_choices(choices: Array, start_index: int, avoid_recent: bool) -> void:
 	var bonus_index := start_index
 	while choices.size() < 3 and bonus_index < start_index + WAVE_BONUSES.size():
 		var bonus: Dictionary = WAVE_BONUSES[bonus_index % WAVE_BONUSES.size()]
+		if avoid_recent and _is_recent_bonus(bonus):
+			bonus_index += 1
+			continue
+		if _has_bonus_choice(choices, bonus):
+			bonus_index += 1
+			continue
 		var available_bonus := _get_available_bonus(bonus)
 		if not available_bonus.is_empty():
 			choices.append(available_bonus)
 		bonus_index += 1
-	return choices
+
+func _is_recent_bonus(bonus: Dictionary) -> bool:
+	return recent_bonus_ids.has(str(bonus.get("id", "")))
+
+func _has_bonus_choice(choices: Array, bonus: Dictionary) -> bool:
+	var bonus_id := str(bonus.get("id", ""))
+	for choice in choices:
+		if str(choice.get("id", "")) == bonus_id:
+			return true
+	return false
 
 func _get_available_bonus(bonus: Dictionary) -> Dictionary:
 	var available_bonus := bonus.duplicate()
@@ -698,7 +723,39 @@ func _get_available_bonus(bonus: Dictionary) -> Dictionary:
 		var offered_lives: int = min(int(available_bonus["lives"]), missing_lives)
 		available_bonus["lives"] = offered_lives
 		available_bonus["description"] = "+%s %s." % [offered_lives, "life" if offered_lives == 1 else "lives"]
+	elif available_bonus.has("tower_id"):
+		available_bonus = _scale_tower_bonus_offer(available_bonus)
 	return available_bonus
+
+func _scale_tower_bonus_offer(bonus: Dictionary) -> Dictionary:
+	var tower_id := str(bonus["tower_id"])
+	var scale := _get_tower_bonus_scale(tower_id)
+	var scaled_bonus := bonus.duplicate()
+	for key in ["range_bonus", "splash_bonus", "slow_bonus", "pierce_bonus"]:
+		if scaled_bonus.has(key):
+			scaled_bonus[key] = float(scaled_bonus[key]) * scale
+	for key in ["damage_multiplier", "fire_rate_multiplier"]:
+		if scaled_bonus.has(key):
+			scaled_bonus[key] = 1.0 + (float(scaled_bonus[key]) - 1.0) * scale
+	scaled_bonus["description"] = _get_scaled_bonus_description(scaled_bonus)
+	return scaled_bonus
+
+func _get_tower_bonus_scale(tower_id: String) -> float:
+	var count := int(tower_bonus_counts.get(tower_id, 0))
+	var scale_index: int = min(count, TOWER_BONUS_SCALES.size() - 1)
+	return float(TOWER_BONUS_SCALES[scale_index])
+
+func _get_scaled_bonus_description(bonus: Dictionary) -> String:
+	if bonus.has("damage_multiplier"):
+		var damage_bonus: int = int(round((float(bonus["damage_multiplier"]) - 1.0) * 100.0))
+		return "%s towers gain +%s%% damage." % [_get_short_tower_name(str(bonus["tower_id"])), damage_bonus]
+	if bonus.has("slow_bonus"):
+		return "%s towers gain stronger slow." % _get_short_tower_name(str(bonus["tower_id"]))
+	if bonus.has("splash_bonus"):
+		return "%s gain +%s blast radius." % [_get_short_tower_name(str(bonus["tower_id"])), int(round(float(bonus["splash_bonus"])))]
+	if bonus.has("range_bonus"):
+		return "%s gain +%s range." % [_get_short_tower_name(str(bonus["tower_id"])), int(round(float(bonus["range_bonus"])))]
+	return str(bonus.get("description", "Tower bonus."))
 
 func _on_bonus_pressed(index: int) -> void:
 	if not bonus_pending or index < 0 or index >= active_bonus_choices.size():
@@ -706,6 +763,7 @@ func _on_bonus_pressed(index: int) -> void:
 
 	var bonus: Dictionary = active_bonus_choices[index]
 	_apply_wave_bonus(bonus)
+	_remember_bonus_choice(bonus)
 	bonus_pending = false
 	bonus_panel.visible = false
 	status_label.text = "Support received: %s." % bonus["name"]
@@ -721,6 +779,7 @@ func _apply_wave_bonus(bonus: Dictionary) -> void:
 
 	var tower_id := str(bonus["tower_id"])
 	var effect := _get_tower_bonus_effect(bonus)
+	tower_bonus_counts[tower_id] = int(tower_bonus_counts.get(tower_id, 0)) + 1
 	_store_tower_bonus(tower_id, effect)
 	for tower in placed_towers:
 		if is_instance_valid(tower) and tower.tower_id == tower_id:
@@ -745,6 +804,14 @@ func _apply_stored_bonuses_to_tower(tower: Node2D) -> void:
 		return
 	for effect in tower_match_bonuses[tower.tower_id]:
 		tower.apply_match_bonus(effect)
+
+func _remember_bonus_choice(bonus: Dictionary) -> void:
+	var bonus_id := str(bonus.get("id", ""))
+	if bonus_id.is_empty():
+		return
+	recent_bonus_ids.append(bonus_id)
+	while recent_bonus_ids.size() > RECENT_BONUS_LIMIT:
+		recent_bonus_ids.pop_front()
 
 func _play_sound(sound_id: String) -> void:
 	if audio_manager != null and audio_manager.has_method("play"):
