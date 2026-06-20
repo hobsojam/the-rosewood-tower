@@ -1,12 +1,12 @@
 [
   {"name": "Perimeter Probe", "enemies": {"standard": 8}},
-  {"name": "Fast Lane", "enemies": {"standard": 5, "fast": 8}},
+  {"name": "Runner Surge", "enemies": {"standard": 5, "fast": 8}},
   {"name": "Iron Column", "enemies": {"standard": 5, "armored": 4}},
   {"name": "Signal Clutter", "enemies": {"standard": 8, "fast": 6, "decoy": 3}},
   {"name": "Shield Convoy", "enemies": {"standard": 12, "armored": 3, "shield": 2}},
-  {"name": "Breakneck Mix", "enemies": {"standard": 6, "fast": 10, "armored": 2, "decoy": 4}},
+  {"name": "Overrun Junction", "enemies": {"standard": 6, "fast": 10, "armored": 2, "decoy": 4}},
   {"name": "Airspace Breach", "enemies": {"standard": 6, "fast": 4, "air": 7}},
   {"name": "Siege Line", "enemies": {"standard": 8, "armored": 5, "shield": 2, "siege": 2}},
-  {"name": "False Sky", "enemies": {"fast": 12, "decoy": 6, "air": 5}},
-  {"name": "Rosewood Collapse", "enemies": {"standard": 14, "fast": 10, "armored": 6, "shield": 2, "decoy": 4, "siege": 2, "air": 7}}
+  {"name": "Phantom Flight", "enemies": {"fast": 12, "decoy": 6, "air": 5}},
+  {"name": "Rosewood Stand", "enemies": {"standard": 14, "fast": 10, "armored": 6, "shield": 2, "decoy": 4, "siege": 2, "air": 7}}
 ]
