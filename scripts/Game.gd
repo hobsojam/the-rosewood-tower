@@ -52,6 +52,8 @@ const WAVE_BONUSES := [
 
 var money := 130
 var lives := STARTING_LIVES
+var kills := 0
+var run_start_time := 0.0
 var selected_tower_id := "basic"
 var tower_data := {}
 var placed_towers: Array[Node2D] = []
@@ -90,7 +92,9 @@ var speed_label: Label
 var status_label: Label
 var selected_tower_label: Label
 var overlay_title_label: Label
+var overlay_stats_label: Label
 var map_label: Label
+var map_challenge_label: Label
 var next_map_button: Button
 var start_button: Button
 var restart_button: Button
@@ -428,6 +432,11 @@ func _create_overlay_panel() -> void:
 	layout.add_child(title)
 	overlay_title_label = title
 
+	overlay_stats_label = Label.new()
+	overlay_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	overlay_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(overlay_stats_label)
+
 	var overlay_restart_button := Button.new()
 	overlay_restart_button.text = "Restart"
 	overlay_restart_button.pressed.connect(_on_restart_pressed)
@@ -463,6 +472,12 @@ func _create_title_panel() -> void:
 	map_label = Label.new()
 	map_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(map_label)
+
+	map_challenge_label = Label.new()
+	map_challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	map_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	map_challenge_label.custom_minimum_size = Vector2(380, 0)
+	layout.add_child(map_challenge_label)
 
 	next_map_button = Button.new()
 	next_map_button.text = "Change Map"
@@ -564,9 +579,9 @@ func _update_codex_panel() -> void:
 	for enemy_id in ENEMY_IDS:
 		if not seen_enemy_ids.has(enemy_id):
 			ordered.append(enemy_id)
-	var layout := codex_rows[ordered[0]].get_parent()
+	var layout: Node = codex_rows[ordered[0]].get_parent()
 	for i in ordered.size():
-		layout.move_child(codex_rows[ordered[i]], i + 1)
+		layout.move_child(codex_rows[ordered[i]] as Node, i + 1)
 
 func _on_tower_guide_pressed() -> void:
 	var new_state := not tower_guide_panel.visible
@@ -835,6 +850,7 @@ func _on_mute_toggled(button_pressed: bool) -> void:
 
 func _on_enemy_died(reward: int) -> void:
 	money += reward
+	kills += 1
 	_play_sound("enemy_death")
 	_update_hud()
 
@@ -886,6 +902,16 @@ func _show_end_overlay(title_text: String) -> void:
 		bonus_panel.visible = false
 	if overlay_title_label != null:
 		overlay_title_label.text = title_text
+	if overlay_stats_label != null:
+		var elapsed := int(Time.get_unix_time_from_system() - run_start_time)
+		var minutes := elapsed / 60
+		var seconds := elapsed % 60
+		var wave_reached := max(wave_manager.current_wave + 1, 0)
+		overlay_stats_label.text = "Kills: %d   Lives: %d/%d   Wave: %d/%d   Time: %dm %02ds" % [
+			kills, lives, STARTING_LIVES,
+			wave_reached, wave_manager.total_waves,
+			minutes, seconds
+		]
 	overlay_panel.visible = true
 
 func _show_bonus_choices(wave_number: int) -> void:
@@ -1127,6 +1153,7 @@ func _on_menu_pressed() -> void:
 
 func _on_start_game_pressed() -> void:
 	game_started = true
+	run_start_time = Time.get_unix_time_from_system()
 	title_panel.visible = false
 	status_label.text = "Build defenses, then start wave 1."
 	_update_hud()
@@ -1232,6 +1259,9 @@ func _update_hud() -> void:
 	mute_button.button_pressed = audio_manager.is_muted()
 	if map_label != null:
 		map_label.text = "Map: %s" % map.get_map_name(selected_map_index)
+	if map_challenge_label != null:
+		map_challenge_label.text = map.get_map_challenge(selected_map_index)
+		map_challenge_label.visible = not game_started
 	pause_button.button_pressed = game_paused
 	pause_button.disabled = not game_started or wave_manager.game_over
 	for tower_id in tower_buttons:

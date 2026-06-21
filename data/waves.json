@@ -8,5 +8,10 @@
   {"name": "Airspace Breach",  "enemies": {"standard": 6, "fast": 4, "air": 7}},
   {"name": "Covered Column",   "enemies": {"armored": 4, "decoy": 5, "repair": 3, "shield": 3, "siege": 1}},
   {"name": "Phantom Support",  "enemies": {"fast": 6, "decoy": 4, "shield": 3, "repair": 3, "air": 5}},
-  {"name": "Rosewood Stand",   "enemies": {"standard": 12, "fast": 8, "armored": 6, "shield": 4, "decoy": 5, "burrower": 4, "repair": 4, "siege": 2, "air": 6}}
+  {"name": "Rosewood Stand",   "enemies": {"standard": 12, "fast": 8, "armored": 6, "shield": 4, "decoy": 5, "burrower": 4, "repair": 4, "siege": 2, "air": 6}},
+  {"name": "Iron Tide",        "enemies": {"standard": 6, "armored": 8, "repair": 3, "shield": 2}},
+  {"name": "Sky Dominance",    "enemies": {"standard": 6, "fast": 8, "air": 12}},
+  {"name": "Ghost Protocol",   "enemies": {"fast": 4, "decoy": 8, "air": 6, "burrower": 6}},
+  {"name": "Armored Command",  "enemies": {"standard": 8, "armored": 6, "siege": 3, "repair": 3, "shield": 3}},
+  {"name": "Last Breach",      "enemies": {"standard": 12, "fast": 10, "armored": 8, "air": 8, "siege": 3, "burrower": 6, "repair": 3, "shield": 3, "decoy": 4}}
 ]
