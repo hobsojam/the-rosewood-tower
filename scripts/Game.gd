@@ -199,7 +199,7 @@ func _create_hud() -> void:
 	for enemy_id in ENEMY_IDS:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
-		label.mouse_filter = Control.MOUSE_FILTER_PASS
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
 		next_wave_row.add_child(label)
 		next_wave_count_labels[enemy_id] = label
 	layout.add_child(speed_label)
