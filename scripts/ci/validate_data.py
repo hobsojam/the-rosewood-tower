@@ -38,6 +38,17 @@ def validate_enemies(enemies):
             assert_true(enemy["repair_radius"] > 0, f"Enemy {enemy_id} repair radius must be positive")
         if "repair_per_second" in enemy:
             assert_true(enemy["repair_per_second"] > 0, f"Enemy {enemy_id} repair rate must be positive")
+        if "burrow_cycle_time" in enemy:
+            assert_true(enemy["burrow_cycle_time"] > 0, f"Enemy {enemy_id} burrow cycle time must be positive")
+        if "burrow_surface_time" in enemy:
+            assert_true(enemy["burrow_surface_time"] > 0, f"Enemy {enemy_id} burrow surface time must be positive")
+            assert_true(enemy["burrow_surface_time"] < enemy.get("burrow_cycle_time", enemy["burrow_surface_time"] + 1), f"Enemy {enemy_id} surface time must be less than cycle time")
+        if "burrow_surface_speed_multiplier" in enemy:
+            assert_true(enemy["burrow_surface_speed_multiplier"] > 0, f"Enemy {enemy_id} surface speed multiplier must be positive")
+        if "burrow_submerged_speed_multiplier" in enemy:
+            assert_true(enemy["burrow_submerged_speed_multiplier"] > 0, f"Enemy {enemy_id} submerged speed multiplier must be positive")
+        if "burrow_surface_speed_multiplier" in enemy and "burrow_submerged_speed_multiplier" in enemy:
+            assert_true(enemy["burrow_surface_speed_multiplier"] > enemy["burrow_submerged_speed_multiplier"], f"Enemy {enemy_id} surface speed must be faster than submerged speed")
         assert_true(isinstance(enemy.get("traits", []), list), f"Enemy {enemy_id} traits must be a list")
 
 

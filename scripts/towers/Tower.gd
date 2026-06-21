@@ -89,6 +89,8 @@ func _can_target_enemy(enemy: Node2D) -> bool:
 		return is_air
 	if is_air and (damage_tags.has("blast") or damage_tags.has("slow")):
 		return false
+	if _enemy_has_trait(enemy, "burrowed") and not damage_tags.has("blast") and enemy.has_method("is_burrowed") and enemy.is_burrowed():
+		return false
 	return true
 
 func _get_target_score(enemy: Node2D, distance: float) -> float:
@@ -268,6 +270,8 @@ func _fire_railgun_at(target: Node2D) -> void:
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		var enemy_node := enemy as Node2D
 		if enemy_node == null or not is_instance_valid(enemy_node):
+			continue
+		if not _can_target_enemy(enemy_node):
 			continue
 		if global_position.distance_to(enemy_node.global_position) > attack_range + pierce_width:
 			continue

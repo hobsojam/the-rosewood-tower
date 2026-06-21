@@ -17,6 +17,11 @@ var shield_radius := 0.0
 var shield_reduction := 0.0
 var repair_radius := 0.0
 var repair_per_second := 0.0
+var burrow_cycle_time := 0.0
+var burrow_surface_time := 0.0
+var burrow_surface_speed_multiplier := 1.0
+var burrow_submerged_speed_multiplier := 1.0
+var burrow_time := 0.0
 var path_points := []
 var path_index := 0
 var slow_multiplier := 1.0
@@ -47,6 +52,10 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	shield_reduction = float(data.get("shield_reduction", 0.0))
 	repair_radius = float(data.get("repair_radius", 0.0))
 	repair_per_second = float(data.get("repair_per_second", 0.0))
+	burrow_cycle_time = float(data.get("burrow_cycle_time", 0.0))
+	burrow_surface_time = float(data.get("burrow_surface_time", 0.0))
+	burrow_surface_speed_multiplier = float(data.get("burrow_surface_speed_multiplier", 1.0))
+	burrow_submerged_speed_multiplier = float(data.get("burrow_submerged_speed_multiplier", 1.0))
 	body_color = Color.html(str(data["color"]))
 	path_points = path.duplicate()
 
@@ -74,11 +83,12 @@ func _process(delta: float) -> void:
 	if shield_absorb_flash_time > 0.0:
 		shield_absorb_flash_time -= delta
 		queue_redraw()
+	_update_burrow_state(delta)
 
 	var target: Vector2 = path_points[path_index + 1]
 	var direction: Vector2 = target - global_position
 	var distance: float = direction.length()
-	var step: float = base_speed * slow_multiplier * delta
+	var step: float = _get_current_speed() * slow_multiplier * delta
 	if distance > 0.0:
 		facing_angle = direction.angle()
 
@@ -127,6 +137,26 @@ func get_path_progress() -> float:
 
 	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
 	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
+
+func is_burrowed() -> bool:
+	if not traits.has("burrowed") or burrow_cycle_time <= 0.0:
+		return false
+	return fmod(burrow_time, burrow_cycle_time) >= burrow_surface_time
+
+func _get_current_speed() -> float:
+	if traits.has("burrowed") and burrow_cycle_time > 0.0:
+		if is_burrowed():
+			return base_speed * burrow_submerged_speed_multiplier
+		return base_speed * burrow_surface_speed_multiplier
+	return base_speed
+
+func _update_burrow_state(delta: float) -> void:
+	if not traits.has("burrowed") or burrow_cycle_time <= 0.0:
+		return
+	var was_burrowed := is_burrowed()
+	burrow_time += delta
+	if was_burrowed != is_burrowed():
+		queue_redraw()
 
 func receive_repair(amount: float) -> bool:
 	if finished or health >= max_health:
@@ -185,8 +215,8 @@ func _get_trait_damage_multiplier(damage_tags: Array[String]) -> float:
 		multiplier *= 0.15
 	if not traits.has("air") and damage_tags.has("anti_air"):
 		multiplier *= 0.6
-	if traits.has("burrowed") and not damage_tags.has("blast"):
-		multiplier *= 0.45
+	if traits.has("burrowed") and not damage_tags.has("blast") and is_burrowed():
+		multiplier *= 0.15
 	if traits.has("armored") and damage_tags.has("direct") and not damage_tags.has("pierce"):
 		multiplier *= 0.65
 	if traits.has("armored") and damage_tags.has("pierce"):
@@ -326,6 +356,27 @@ func _draw_decoy_enemy(color: Color) -> void:
 func _draw_burrower_enemy(color: Color) -> void:
 	draw_circle(Vector2.ZERO, 24.0, Color(0.45, 0.27, 0.08, 0.18))
 	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	if is_burrowed():
+		var mound := PackedVector2Array([
+			Vector2(-22, 0),
+			Vector2(-16, -7),
+			Vector2(-6, -10),
+			Vector2(6, -10),
+			Vector2(16, -7),
+			Vector2(22, 0),
+			Vector2(16, 7),
+			Vector2(6, 10),
+			Vector2(-6, 10),
+			Vector2(-16, 7)
+		])
+		draw_colored_polygon(mound, Color("#451a03"))
+		draw_polyline(PackedVector2Array([Vector2(-22, 0), Vector2(-16, -7), Vector2(-6, -10), Vector2(6, -10), Vector2(16, -7), Vector2(22, 0), Vector2(16, 7), Vector2(6, 10), Vector2(-6, 10), Vector2(-16, 7), Vector2(-22, 0)]), Color("#92400e"), 2.0)
+		draw_arc(Vector2.ZERO, 19.0, 0.0, TAU, 20, Color("#a16207"), 3.0)
+		draw_line(Vector2(2, -6), Vector2(19, -3), Color("#facc15"), 3.0)
+		draw_line(Vector2(2, 0), Vector2(21, 0), Color("#facc15"), 3.0)
+		draw_line(Vector2(2, 6), Vector2(19, 3), Color("#facc15"), 3.0)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		return
 	var body := PackedVector2Array([Vector2(19, 0), Vector2(7, -12), Vector2(-15, -10), Vector2(-21, 0), Vector2(-15, 10), Vector2(7, 12)])
 	draw_colored_polygon(body, color)
 	draw_polyline(PackedVector2Array([Vector2(19, 0), Vector2(7, -12), Vector2(-15, -10), Vector2(-21, 0), Vector2(-15, 10), Vector2(7, 12), Vector2(19, 0)]), Color("#111827"), 2.0)
