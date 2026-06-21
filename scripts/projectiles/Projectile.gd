@@ -3,16 +3,18 @@ extends Area2D
 var target
 var damage := 10.0
 var splash_radius := 0.0
+var splash_damage_multiplier := 1.0
 var slow := 0.0
 var speed := 520.0
 var projectile_color := Color("#f8fafc")
 var impact_ring_time := 0.0
 var damage_tags: Array[String] = []
 
-func configure(target_enemy, amount: float, splash: float, slow_amount: float, color: Color, tags: Array[String]) -> void:
+func configure(target_enemy, amount: float, splash: float, slow_amount: float, color: Color, tags: Array[String], splash_multiplier: float = 1.0) -> void:
 	target = target_enemy
 	damage = amount
 	splash_radius = splash
+	splash_damage_multiplier = splash_multiplier
 	slow = slow_amount
 	projectile_color = color
 	damage_tags = tags.duplicate()
@@ -48,7 +50,8 @@ func _impact() -> void:
 		for splash_hit in splash_hits:
 			var hit_enemy := splash_hit["enemy"] as Node2D
 			if hit_enemy != null and is_instance_valid(hit_enemy):
-				hit_enemy.take_damage(damage, slow, 1.2, damage_tags, float(splash_hit["shield_reduction"]))
+				var hit_damage := damage if hit_enemy == target else damage * splash_damage_multiplier
+				hit_enemy.take_damage(hit_damage, slow, 1.2, damage_tags, float(splash_hit["shield_reduction"]))
 		_show_impact_ring()
 	else:
 		if is_instance_valid(target):

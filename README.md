@@ -65,7 +65,7 @@ Standard and fast enemies now have distinct crawler/drone silhouettes, and each 
 Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
 Placed towers can target nearest, first, last, strongest, or weakest enemies.
-Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity.
+Tower damage now uses data-driven weapon tags and enemy traits, allowing strong counters such as anti-air or blast without hard immunity. Mortars deal full damage to the direct target and reduced damage to nearby splash targets.
 Rivet Turrets are tuned as starter/generalist towers: direct fire is weaker into armored, heavy, and air traits, while Mortars, Railguns, and AAA carry clearer counter roles.
 Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Foam/Mortars do not fire at air.
 Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives start at 12 and are capped at 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.

@@ -17,6 +17,7 @@ var damage := 10.0
 var attack_range := 120.0
 var fire_rate := 0.5
 var splash_radius := 0.0
+var splash_damage_multiplier := 1.0
 var slow := 0.0
 var pierce_width := 0.0
 var damage_tags: Array[String] = []
@@ -39,6 +40,7 @@ func configure(id: String, data: Dictionary) -> void:
 	attack_range = float(data["range"])
 	fire_rate = float(data["fire_rate"])
 	splash_radius = float(data["splash_radius"])
+	splash_damage_multiplier = float(data.get("splash_damage_multiplier", 1.0))
 	slow = float(data["slow"])
 	pierce_width = float(data.get("pierce_width", 0.0))
 	damage_tags = _to_string_array(data.get("tags", []))
@@ -184,7 +186,7 @@ func get_stats_summary() -> String:
 		"slow":
 			return "Damage %.0f | Slow %.0f%% | Range %.0f" % [damage, slow * 100.0, attack_range]
 		"splash":
-			return "Damage %.0f | Blast %.0f | Range %.0f" % [damage, splash_radius, attack_range]
+			return "Hit %.0f | Splash %.0f | Blast %.0f" % [damage, damage * splash_damage_multiplier, splash_radius]
 		_:
 			return "Damage %.0f | Rate %.2fs | Range %.0f" % [damage, fire_rate, attack_range]
 
@@ -253,7 +255,7 @@ func _fire_at(target) -> void:
 		return
 
 	var projectile = PROJECTILE_SCENE.instantiate()
-	projectile.configure(target, damage, splash_radius, slow, body_color, damage_tags)
+	projectile.configure(target, damage, splash_radius, slow, body_color, damage_tags, splash_damage_multiplier)
 	projectile.global_position = global_position
 	get_tree().current_scene.add_child(projectile)
 	var audio_manager := get_tree().current_scene.get_node_or_null("AudioManager")

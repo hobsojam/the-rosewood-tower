@@ -32,7 +32,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 
 - Basic turret: reliable single-target damage
 - Cryo/foam sprayer: low damage, applies slow
-- Mortar: slower fire rate, splash damage
+- Mortar: slower fire rate, full damage on direct hit and reduced damage to nearby splash targets
 - Railgun: high-cost, slow-firing beam that pierces enemies in a line
 - AAA flak turret: anti-air counter offered as the required support unlock before air threats appear; only targets air enemies
 - Towers can expose weapon tags such as direct, blast, pierce, slow, or anti-air for enemy trait interactions.
