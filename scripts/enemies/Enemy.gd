@@ -19,6 +19,8 @@ var repair_radius := 0.0
 var repair_per_second := 0.0
 var burrow_cycle_time := 0.0
 var burrow_surface_time := 0.0
+var burrow_surface_speed_multiplier := 1.0
+var burrow_submerged_speed_multiplier := 1.0
 var burrow_time := 0.0
 var path_points := []
 var path_index := 0
@@ -52,6 +54,8 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	repair_per_second = float(data.get("repair_per_second", 0.0))
 	burrow_cycle_time = float(data.get("burrow_cycle_time", 0.0))
 	burrow_surface_time = float(data.get("burrow_surface_time", 0.0))
+	burrow_surface_speed_multiplier = float(data.get("burrow_surface_speed_multiplier", 1.0))
+	burrow_submerged_speed_multiplier = float(data.get("burrow_submerged_speed_multiplier", 1.0))
 	body_color = Color.html(str(data["color"]))
 	path_points = path.duplicate()
 
@@ -84,7 +88,7 @@ func _process(delta: float) -> void:
 	var target: Vector2 = path_points[path_index + 1]
 	var direction: Vector2 = target - global_position
 	var distance: float = direction.length()
-	var step: float = base_speed * slow_multiplier * delta
+	var step: float = _get_current_speed() * slow_multiplier * delta
 	if distance > 0.0:
 		facing_angle = direction.angle()
 
@@ -138,6 +142,13 @@ func is_burrowed() -> bool:
 	if not traits.has("burrowed") or burrow_cycle_time <= 0.0:
 		return false
 	return fmod(burrow_time, burrow_cycle_time) >= burrow_surface_time
+
+func _get_current_speed() -> float:
+	if traits.has("burrowed") and burrow_cycle_time > 0.0:
+		if is_burrowed():
+			return base_speed * burrow_submerged_speed_multiplier
+		return base_speed * burrow_surface_speed_multiplier
+	return base_speed
 
 func _update_burrow_state(delta: float) -> void:
 	if not traits.has("burrowed") or burrow_cycle_time <= 0.0:
