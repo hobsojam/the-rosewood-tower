@@ -904,8 +904,8 @@ func _show_end_overlay(title_text: String) -> void:
 		overlay_title_label.text = title_text
 	if overlay_stats_label != null:
 		var elapsed := int(Time.get_unix_time_from_system() - run_start_time)
-		var minutes := elapsed / 60
-		var seconds := elapsed % 60
+		var minutes: int = elapsed / 60
+		var seconds: int = elapsed % 60
 		var wave_reached: int = max(wave_manager.current_wave + 1, 0)
 		overlay_stats_label.text = "Kills: %d   Lives: %d/%d   Wave: %d/%d   Time: %dm %02ds" % [
 			kills, lives, STARTING_LIVES,
