@@ -496,10 +496,10 @@ func _update_codex_panel() -> void:
 		var row: Label = codex_row_labels[enemy_id]
 		if seen_enemy_ids.has(enemy_id):
 			var data: Dictionary = ENEMY_CODEX[enemy_id]
-			row.text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
-			next_wave_count_labels[enemy_id].tooltip_text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
+			row.text = "%s\n%s" % [data["name"], data["description"]]
+			next_wave_count_labels[enemy_id].tooltip_text = "%s\n%s" % [data["name"], data["description"]]
 		else:
-			row.text = "? - ???"
+			row.text = "???"
 			next_wave_count_labels[enemy_id].tooltip_text = ""
 
 func _get_short_tower_name(tower_id: String) -> String:
