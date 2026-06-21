@@ -501,6 +501,13 @@ func _update_codex_panel() -> void:
 		else:
 			row.text = "? - ???"
 			next_wave_count_labels[enemy_id].tooltip_text = ""
+	var ordered: Array[String] = seen_enemy_ids.duplicate()
+	for enemy_id in ENEMY_IDS:
+		if not seen_enemy_ids.has(enemy_id):
+			ordered.append(enemy_id)
+	var layout := codex_row_labels[ordered[0]].get_parent()
+	for i in ordered.size():
+		layout.move_child(codex_row_labels[ordered[i]], i + 1)
 
 func _get_short_tower_name(tower_id: String) -> String:
 	match tower_id:
