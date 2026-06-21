@@ -11,6 +11,18 @@ const MAX_LIVES := 12
 const RECENT_BONUS_LIMIT := 2
 const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
 const TOWER_ORDER := ["basic", "slow", "splash", "railgun", "aaa"]
+const ENEMY_IDS := ["standard", "fast", "decoy", "repair", "shield", "burrower", "armored", "siege", "air"]
+const ENEMY_CODEX := {
+	"standard": {"name": "Crawler", "description": "Baseline unit. Rivets handle it efficiently."},
+	"fast":     {"name": "Runner Drone", "description": "Fast, fragile unit. Catch it with early coverage."},
+	"shield":   {"name": "Shield Carrier", "description": "Protects nearby enemies. Focus the carrier."},
+	"decoy":    {"name": "Signal Decoy", "description": "Tough, low-reward distraction. Targeting mode matters."},
+	"repair":   {"name": "Repair Drone", "description": "Repairs nearby enemies. Kill it before armored groups."},
+	"burrower": {"name": "Tunnel Rig", "description": "Sprints above ground, then burrows. Mortars handle it best."},
+	"air":      {"name": "Rotor Drone", "description": "Air threat. Requires AAA coverage."},
+	"armored":  {"name": "Armored Hauler", "description": "Resists ordinary direct fire. Railguns and blast help."},
+	"siege":    {"name": "Siege Walker", "description": "Very tough, slow, and costs 2 lives if it breaches."},
+}
 const INITIAL_UNLOCKED_TOWERS := ["basic"]
 const REQUIRED_COUNTER_UNLOCKS := {
 	"air": {"id": "unlock_aaa", "name": "AAA Authorization", "description": "Air threat detected. Unlock AAA Flak Turrets.", "unlock_tower_id": "aaa"}
@@ -87,6 +99,10 @@ var volume_slider: HSlider
 var volume_label: Label
 var tower_buttons := {}
 var next_wave_count_labels := {}
+var seen_enemy_ids: Array[String] = []
+var codex_panel: PanelContainer
+var codex_row_labels := {}
+var codex_button: Button
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -180,10 +196,9 @@ func _create_hud() -> void:
 	next_wave_row.add_theme_constant_override("h_separation", 8)
 	next_wave_row.add_theme_constant_override("v_separation", 2)
 	layout.add_child(next_wave_row)
-	for enemy_id in ["standard", "fast", "decoy", "repair", "shield", "burrower", "armored", "siege", "air"]:
+	for enemy_id in ENEMY_IDS:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
-		label.tooltip_text = "%s - %s" % [_get_enemy_icon(enemy_id), _get_enemy_tooltip(enemy_id)]
 		label.mouse_filter = Control.MOUSE_FILTER_PASS
 		next_wave_row.add_child(label)
 		next_wave_count_labels[enemy_id] = label
@@ -252,12 +267,19 @@ func _create_hud() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 	layout.add_child(settings_button)
 
+	codex_button = Button.new()
+	codex_button.text = "Field Guide"
+	codex_button.toggle_mode = true
+	codex_button.pressed.connect(_on_codex_pressed)
+	layout.add_child(codex_button)
+
 	_create_bonus_panel()
 	_create_settings_panel(layout)
 	_create_selection_panel(layout)
 	_create_overlay_panel()
 	_create_title_panel()
 	_create_feedback_overlays()
+	_create_codex_panel()
 	tower_buttons[selected_tower_id].button_pressed = true
 	speed_1x_button.button_pressed = true
 	_update_tower_unlocks()
@@ -436,6 +458,50 @@ func _create_title_panel() -> void:
 	quit_button.pressed.connect(_on_quit_pressed)
 	layout.add_child(quit_button)
 
+func _create_codex_panel() -> void:
+	codex_panel = PanelContainer.new()
+	codex_panel.position = Vector2(178, 30)
+	codex_panel.custom_minimum_size = Vector2(620, 0)
+	hud_layer.add_child(codex_panel)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 6)
+	codex_panel.add_child(layout)
+
+	var title := Label.new()
+	title.text = "Field Guide"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(title)
+
+	for enemy_id in ENEMY_IDS:
+		var row := Label.new()
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		layout.add_child(row)
+		codex_row_labels[enemy_id] = row
+
+	var close_button := Button.new()
+	close_button.text = "Close"
+	close_button.pressed.connect(_on_codex_pressed)
+	layout.add_child(close_button)
+
+	codex_panel.visible = false
+	_update_codex_panel()
+
+func _on_codex_pressed() -> void:
+	codex_panel.visible = not codex_panel.visible
+	codex_button.button_pressed = codex_panel.visible
+
+func _update_codex_panel() -> void:
+	for enemy_id in codex_row_labels:
+		var row: Label = codex_row_labels[enemy_id]
+		if seen_enemy_ids.has(enemy_id):
+			var data: Dictionary = ENEMY_CODEX[enemy_id]
+			row.text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
+			next_wave_count_labels[enemy_id].tooltip_text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
+		else:
+			row.text = "? - ???"
+			next_wave_count_labels[enemy_id].tooltip_text = ""
+
 func _get_short_tower_name(tower_id: String) -> String:
 	match tower_id:
 		"basic":
@@ -475,29 +541,6 @@ func _get_enemy_icon(enemy_id: String) -> String:
 			push_warning("_get_enemy_icon: unknown enemy_id '%s'" % enemy_id)
 			return "?"
 
-func _get_enemy_tooltip(enemy_id: String) -> String:
-	match enemy_id:
-		"standard":
-			return "Crawler\nBaseline unit. Rivets handle it efficiently."
-		"fast":
-			return "Runner Drone\nFast, fragile unit. Catch it with early coverage."
-		"shield":
-			return "Shield Carrier\nProtects nearby enemies. Focus the carrier."
-		"decoy":
-			return "Signal Decoy\nTough, low-reward distraction. Targeting mode matters."
-		"repair":
-			return "Repair Drone\nRepairs nearby enemies. Kill it before armored groups."
-		"burrower":
-			return "Tunnel Rig\nSprints above ground, then burrows. Mortars handle it best."
-		"air":
-			return "Rotor Drone\nAir threat. Requires AAA coverage."
-		"armored":
-			return "Armored Hauler\nResists ordinary direct fire. Railguns and blast help."
-		"siege":
-			return "Siege Walker\nVery tough, slow, and costs 2 lives if it breaches."
-		_:
-			push_warning("_get_enemy_tooltip: unknown enemy_id '%s'" % enemy_id)
-			return ""
 
 func _try_place_tower(global_pos: Vector2) -> void:
 	if not game_started or wave_manager.game_over:
@@ -1007,7 +1050,7 @@ func _pulse_breach_flash() -> void:
 
 func _is_pointer_over_ui() -> bool:
 	var mouse_pos := get_viewport().get_mouse_position()
-	for panel in [hud_panel, bonus_panel, selection_panel, settings_panel, overlay_panel, title_panel]:
+	for panel in [hud_panel, bonus_panel, selection_panel, settings_panel, overlay_panel, title_panel, codex_panel]:
 		if panel != null and panel.visible and panel.get_global_rect().has_point(mouse_pos):
 			return true
 	return false
@@ -1040,6 +1083,13 @@ func _update_hud() -> void:
 	enemies_label.text = "Enemies remaining: %s" % wave_manager.get_remaining_enemies()
 	next_wave_label.text = "Next: %s" % wave_manager.get_next_wave_name()
 	var next_counts: Dictionary = wave_manager.get_next_wave_counts()
+	var newly_seen := false
+	for enemy_id in ENEMY_IDS:
+		if int(next_counts.get(enemy_id, 0)) > 0 and not seen_enemy_ids.has(enemy_id):
+			seen_enemy_ids.append(enemy_id)
+			newly_seen = true
+	if newly_seen:
+		_update_codex_panel()
 	for enemy_id in next_wave_count_labels:
 		next_wave_count_labels[enemy_id].text = "%s: %s" % [_get_enemy_icon(enemy_id), int(next_counts.get(enemy_id, 0))]
 	speed_label.text = "Speed: paused" if game_paused else "Speed: %sx" % int(game_speed)
