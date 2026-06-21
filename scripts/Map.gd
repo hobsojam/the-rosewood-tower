@@ -45,6 +45,13 @@ func get_map_name(index: int = current_map_index) -> String:
 	var safe_index := wrapi(index, 0, maps.size())
 	return str(maps[safe_index].get("name", "Map"))
 
+func get_map_challenge(index: int = current_map_index) -> String:
+	_load_maps()
+	if maps.is_empty():
+		return ""
+	var safe_index := wrapi(index, 0, maps.size())
+	return str(maps[safe_index].get("challenge", ""))
+
 func _load_maps() -> void:
 	if not maps.is_empty():
 		return

@@ -1,6 +1,7 @@
 [
   {
     "name": "Factory Approach",
+    "challenge": "Balanced S-curve. Towers near the bends can cover two segments — good for learning.",
     "path": [[-80, 360], [220, 360], [220, 190], [520, 190], [520, 500], [900, 500], [900, 300], [980, 300]],
     "pads": [[120, 250], [120, 470], [300, 260], [650, 110], [460, 300], [620, 390], [650, 585], [770, 415], [780, 585], [865, 410], [820, 210], [890, 380]],
     "props": [
@@ -22,6 +23,7 @@
   },
   {
     "name": "Pipeworks Loop",
+    "challenge": "The path loops back on itself. A tower near the centre fires on two segments — reward for precise placement.",
     "path": [[-80, 260], [180, 260], [180, 520], [410, 520], [410, 140], [700, 140], [700, 420], [920, 420], [980, 420]],
     "pads": [[100, 160], [115, 390], [270, 430], [300, 590], [330, 180], [500, 250], [520, 470], [620, 70], [780, 230], [805, 510], [885, 335], [890, 560]],
     "props": [
@@ -42,6 +44,7 @@
   },
   {
     "name": "Smelter Run",
+    "challenge": "One long open straight then a hard turn. Fast enemies clear the run before you can react — invest in slows early.",
     "path": [[-80, 160], [840, 160], [840, 600], [980, 600]],
     "pads": [
       [100, 60], [270, 60], [450, 60], [630, 60], [790, 60],
@@ -64,6 +67,7 @@
   },
   {
     "name": "The Switchback",
+    "challenge": "Enemies cross the full width three times. More shots per enemy, but pads are split across three rows — you can't cluster.",
     "path": [[-80, 140], [860, 140], [860, 420], [120, 420], [120, 600], [980, 600]],
     "pads": [
       [150, 50], [370, 50], [590, 50], [800, 50],

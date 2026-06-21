@@ -94,6 +94,7 @@ var selected_tower_label: Label
 var overlay_title_label: Label
 var overlay_stats_label: Label
 var map_label: Label
+var map_challenge_label: Label
 var next_map_button: Button
 var start_button: Button
 var restart_button: Button
@@ -471,6 +472,12 @@ func _create_title_panel() -> void:
 	map_label = Label.new()
 	map_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(map_label)
+
+	map_challenge_label = Label.new()
+	map_challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	map_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	map_challenge_label.custom_minimum_size = Vector2(380, 0)
+	layout.add_child(map_challenge_label)
 
 	next_map_button = Button.new()
 	next_map_button.text = "Change Map"
@@ -1252,6 +1259,9 @@ func _update_hud() -> void:
 	mute_button.button_pressed = audio_manager.is_muted()
 	if map_label != null:
 		map_label.text = "Map: %s" % map.get_map_name(selected_map_index)
+	if map_challenge_label != null:
+		map_challenge_label.text = map.get_map_challenge(selected_map_index)
+		map_challenge_label.visible = not game_started
 	pause_button.button_pressed = game_paused
 	pause_button.disabled = not game_started or wave_manager.game_over
 	for tower_id in tower_buttons:
