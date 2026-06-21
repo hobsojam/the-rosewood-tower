@@ -383,15 +383,15 @@ func _create_overlay_panel() -> void:
 	layout.add_child(title)
 	overlay_title_label = title
 
-	var restart_button := Button.new()
-	restart_button.text = "Restart"
-	restart_button.pressed.connect(_on_restart_pressed)
-	layout.add_child(restart_button)
+	var overlay_restart_button := Button.new()
+	overlay_restart_button.text = "Restart"
+	overlay_restart_button.pressed.connect(_on_restart_pressed)
+	layout.add_child(overlay_restart_button)
 
-	var menu_button := Button.new()
-	menu_button.text = "Main Menu"
-	menu_button.pressed.connect(_on_menu_pressed)
-	layout.add_child(menu_button)
+	var overlay_menu_button := Button.new()
+	overlay_menu_button.text = "Main Menu"
+	overlay_menu_button.pressed.connect(_on_menu_pressed)
+	layout.add_child(overlay_menu_button)
 
 func _create_title_panel() -> void:
 	title_panel = PanelContainer.new()
@@ -779,14 +779,14 @@ func _get_available_bonus(bonus: Dictionary) -> Dictionary:
 
 func _scale_tower_bonus_offer(bonus: Dictionary) -> Dictionary:
 	var tower_id := str(bonus["tower_id"])
-	var scale := _get_tower_bonus_scale(tower_id)
+	var bonus_scale := _get_tower_bonus_scale(tower_id)
 	var scaled_bonus := bonus.duplicate()
 	for key in ["range_bonus", "splash_bonus", "slow_bonus", "pierce_bonus"]:
 		if scaled_bonus.has(key):
-			scaled_bonus[key] = float(scaled_bonus[key]) * scale
+			scaled_bonus[key] = float(scaled_bonus[key]) * bonus_scale
 	for key in ["damage_multiplier", "fire_rate_multiplier"]:
 		if scaled_bonus.has(key):
-			scaled_bonus[key] = 1.0 + (float(scaled_bonus[key]) - 1.0) * scale
+			scaled_bonus[key] = 1.0 + (float(scaled_bonus[key]) - 1.0) * bonus_scale
 	scaled_bonus["description"] = _get_scaled_bonus_description(scaled_bonus)
 	return scaled_bonus
 
