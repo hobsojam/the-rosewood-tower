@@ -962,6 +962,7 @@ func _unlock_tower(tower_id: String) -> bool:
 	if not tower_data.has(tower_id) or unlocked_tower_ids.has(tower_id):
 		return false
 	unlocked_tower_ids.append(tower_id)
+	selected_tower_id = tower_id
 	_update_tower_unlocks()
 	return true
 
@@ -1099,6 +1100,11 @@ func _update_hud() -> void:
 	restart_button.disabled = not game_started
 	menu_button.disabled = not game_started
 	settings_button.button_pressed = settings_panel.visible
+	var blocking_open := bonus_panel.visible or overlay_panel.visible or title_panel.visible
+	if blocking_open and codex_panel.visible:
+		codex_panel.visible = false
+		codex_button.button_pressed = false
+	codex_button.disabled = blocking_open
 	volume_label.text = "Volume: %s%%" % int(audio_manager.get_master_volume() * 100.0)
 	volume_slider.value = audio_manager.get_master_volume()
 	mute_button.button_pressed = audio_manager.is_muted()
