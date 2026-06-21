@@ -6,6 +6,6 @@
   "siege": {"name": "Siege Walker", "health": 420, "speed": 38, "reward": 30, "traits": ["armored", "heavy"], "breach_damage": 2, "color": "#ef4444"},
   "decoy": {"name": "Signal Decoy", "health": 260, "speed": 62, "reward": 3, "traits": ["decoy"], "color": "#f472b6"},
   "air": {"name": "Rotor Drone", "health": 95, "speed": 135, "reward": 18, "traits": ["air"], "color": "#a7f3d0"},
-  "burrower": {"name": "Tunnel Rig", "health": 125, "speed": 72, "reward": 15, "traits": ["burrowed"], "color": "#a16207"},
+  "burrower": {"name": "Tunnel Rig", "health": 125, "speed": 72, "reward": 15, "traits": ["burrowed"], "burrow_cycle_time": 4.5, "burrow_surface_time": 1.2, "color": "#a16207"},
   "repair": {"name": "Repair Drone", "health": 75, "speed": 82, "reward": 17, "traits": ["support"], "repair_radius": 78, "repair_per_second": 10, "color": "#4ade80"}
 }

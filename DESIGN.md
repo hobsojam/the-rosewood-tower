@@ -47,7 +47,7 @@ The game is set in an industrial city district of service roads, rail sidings, p
 - Siege walker: very slow, very high health, costs two lives on breach
 - Signal decoy: durable low-reward target that wastes unfocused tower fire
 - Rotor drone: air enemy that resists non-anti-air damage and is immune to Foam and Mortar damage; Foam and Mortars do not target it
-- Tunnel rig: burrowed industrial digger that resists non-blast damage
+- Tunnel rig: burrowed industrial digger that surfaces briefly, then demands blast coverage while submerged
 - Repair drone: support unit that restores nearby damaged enemies and rewards focus fire
 - Enemies can expose traits such as armored, air, burrowed, heavy, support, or decoy. Traits should create resistance/counterplay rather than hard immunity.
 
