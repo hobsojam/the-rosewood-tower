@@ -63,6 +63,8 @@ def validate_towers(towers):
         assert_true(tower["range"] > 0, f"Tower {tower_id} range must be positive")
         assert_true(tower["fire_rate"] > 0, f"Tower {tower_id} fire rate must be positive")
         assert_true(0 <= tower["slow"] <= 1, f"Tower {tower_id} slow must be between 0 and 1")
+        if "splash_damage_multiplier" in tower:
+            assert_true(0 < tower["splash_damage_multiplier"] <= 1, f"Tower {tower_id} splash damage multiplier must be between 0 and 1")
         assert_true(isinstance(tower.get("tags", []), list), f"Tower {tower_id} tags must be a list")
 
 
