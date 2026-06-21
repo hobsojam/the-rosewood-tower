@@ -2,6 +2,8 @@ extends Node2D
 
 const MAP_SCENE := preload("res://scenes/Map.tscn")
 const TOWER_SCENE := preload("res://scenes/towers/Tower.tscn")
+const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
+const CODEX_PORTRAIT_SIZE := Vector2i(72, 72)
 const WAVE_MANAGER_SCRIPT := preload("res://scripts/WaveManager.gd")
 const AUDIO_MANAGER_SCRIPT := preload("res://scripts/AudioManager.gd")
 const UI_X := 976.0
@@ -102,6 +104,7 @@ var next_wave_count_labels := {}
 var seen_enemy_ids: Array[String] = []
 var codex_panel: PanelContainer
 var codex_row_labels := {}
+var codex_row_portraits := {}
 var codex_button: Button
 
 func _ready() -> void:
@@ -474,10 +477,37 @@ func _create_codex_panel() -> void:
 	layout.add_child(title)
 
 	for enemy_id in ENEMY_IDS:
-		var row := Label.new()
-		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
 		layout.add_child(row)
-		codex_row_labels[enemy_id] = row
+
+		var portrait := TextureRect.new()
+		portrait.custom_minimum_size = Vector2(CODEX_PORTRAIT_SIZE)
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.visible = false
+		row.add_child(portrait)
+		codex_row_portraits[enemy_id] = portrait
+
+		var viewport := SubViewport.new()
+		viewport.size = CODEX_PORTRAIT_SIZE
+		viewport.transparent_bg = true
+		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		hud_layer.add_child(viewport)
+		portrait.texture = viewport.get_texture()
+
+		var portrait_enemy = ENEMY_SCENE.instantiate()
+		portrait_enemy.enemy_id = enemy_id
+		portrait_enemy.body_color = Color.html(str(wave_manager.enemy_data.get(enemy_id, {}).get("color", "#ffffff")))
+		portrait_enemy.finished = true
+		portrait_enemy.position = Vector2(CODEX_PORTRAIT_SIZE.x / 2.0, CODEX_PORTRAIT_SIZE.y / 2.0)
+		viewport.add_child(portrait_enemy)
+		portrait_enemy.remove_from_group("enemies")
+
+		var text := Label.new()
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		codex_row_labels[enemy_id] = text
 
 	var close_button := Button.new()
 	close_button.text = "Close"
@@ -493,13 +523,16 @@ func _on_codex_pressed() -> void:
 
 func _update_codex_panel() -> void:
 	for enemy_id in codex_row_labels:
-		var row: Label = codex_row_labels[enemy_id]
+		var text: Label = codex_row_labels[enemy_id]
+		var portrait: TextureRect = codex_row_portraits[enemy_id]
 		if seen_enemy_ids.has(enemy_id):
 			var data: Dictionary = ENEMY_CODEX[enemy_id]
-			row.text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
-			next_wave_count_labels[enemy_id].tooltip_text = "%s - %s\n%s" % [_get_enemy_icon(enemy_id), data["name"], data["description"]]
+			portrait.visible = true
+			text.text = "%s\n%s" % [data["name"], data["description"]]
+			next_wave_count_labels[enemy_id].tooltip_text = "%s\n%s" % [data["name"], data["description"]]
 		else:
-			row.text = "? - ???"
+			portrait.visible = false
+			text.text = "???"
 			next_wave_count_labels[enemy_id].tooltip_text = ""
 
 func _get_short_tower_name(tower_id: String) -> String:
