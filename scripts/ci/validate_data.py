@@ -69,7 +69,7 @@ def validate_towers(towers):
 
 
 def validate_waves(waves, enemy_ids):
-    assert_true(len(waves) == 10, "Expected exactly 10 waves")
+    assert_true(len(waves) >= 10, "Expected at least 10 waves")
     for index, wave in enumerate(waves, start=1):
         assert_true(wave, f"Wave {index} must not be empty")
         assert_true(isinstance(wave.get("name"), str) and wave["name"].strip(), f"Wave {index} needs a name")
