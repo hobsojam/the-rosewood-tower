@@ -15,12 +15,15 @@ var breach_damage := 1
 var traits: Array[String] = []
 var shield_radius := 0.0
 var shield_reduction := 0.0
+var repair_radius := 0.0
+var repair_per_second := 0.0
 var path_points := []
 var path_index := 0
 var slow_multiplier := 1.0
 var slow_time := 0.0
 var body_color := Color.WHITE
 var hit_flash_time := 0.0
+var repair_flash_time := 0.0
 var shield_absorb_flash_time := 0.0
 var finished := false
 var facing_angle := 0.0
@@ -42,6 +45,8 @@ func configure(id: String, data: Dictionary, path: Array) -> void:
 	traits = _to_string_array(data.get("traits", []))
 	shield_radius = float(data.get("shield_radius", 0.0))
 	shield_reduction = float(data.get("shield_reduction", 0.0))
+	repair_radius = float(data.get("repair_radius", 0.0))
+	repair_per_second = float(data.get("repair_per_second", 0.0))
 	body_color = Color.html(str(data["color"]))
 	path_points = path.duplicate()
 
@@ -63,6 +68,9 @@ func _process(delta: float) -> void:
 	if hit_flash_time > 0.0:
 		hit_flash_time -= delta
 		queue_redraw()
+	if repair_flash_time > 0.0:
+		repair_flash_time -= delta
+		queue_redraw()
 	if shield_absorb_flash_time > 0.0:
 		shield_absorb_flash_time -= delta
 		queue_redraw()
@@ -83,6 +91,8 @@ func _process(delta: float) -> void:
 			queue_free()
 	else:
 		global_position += direction.normalized() * step
+
+	_repair_nearby(delta)
 
 func take_damage(amount: float, slow: float = 0.0, slow_duration: float = 1.0, damage_tags: Array[String] = [], shield_reduction_override: float = -1.0) -> void:
 	if finished:
@@ -117,6 +127,33 @@ func get_path_progress() -> float:
 
 	var segment_progress: float = segment_start.distance_to(global_position) / segment_length
 	return float(path_index) + clamp(segment_progress, 0.0, 1.0)
+
+func receive_repair(amount: float) -> bool:
+	if finished or health >= max_health:
+		return false
+	health = min(health + amount, max_health)
+	hit_flash_time = max(hit_flash_time, 0.04)
+	queue_redraw()
+	return true
+
+func _repair_nearby(delta: float) -> void:
+	if repair_radius <= 0.0 or repair_per_second <= 0.0:
+		return
+
+	var repaired_any := false
+	var repair_amount := repair_per_second * delta
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		var enemy_node := enemy as Node2D
+		if enemy_node == null or enemy_node == self or not is_instance_valid(enemy_node):
+			continue
+		if global_position.distance_to(enemy_node.global_position) > repair_radius:
+			continue
+		if enemy_node.has_method("receive_repair") and enemy_node.receive_repair(repair_amount):
+			repaired_any = true
+
+	if repaired_any:
+		repair_flash_time = 0.16
+		queue_redraw()
 
 func _get_effective_damage(amount: float, damage_tags: Array[String], shield_reduction_override: float = -1.0) -> float:
 	var strongest_reduction := shield_reduction_override if shield_reduction_override >= 0.0 else get_incoming_shield_reduction()
@@ -183,6 +220,10 @@ func _draw() -> void:
 	match enemy_id:
 		"air":
 			_draw_air_enemy(color)
+		"burrower":
+			_draw_burrower_enemy(color)
+		"repair":
+			_draw_repair_enemy(color)
 		"siege":
 			_draw_siege_enemy(color)
 		"decoy":
@@ -280,6 +321,35 @@ func _draw_decoy_enemy(color: Color) -> void:
 	draw_line(Vector2(-22, 12), Vector2(-8, 5), Color("#f9a8d4"), 3.0)
 	draw_line(Vector2(8, -5), Vector2(22, -12), Color("#f9a8d4"), 3.0)
 	draw_line(Vector2(8, 5), Vector2(22, 12), Color("#f9a8d4"), 3.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_burrower_enemy(color: Color) -> void:
+	draw_circle(Vector2.ZERO, 24.0, Color(0.45, 0.27, 0.08, 0.18))
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	var body := PackedVector2Array([Vector2(19, 0), Vector2(7, -12), Vector2(-15, -10), Vector2(-21, 0), Vector2(-15, 10), Vector2(7, 12)])
+	draw_colored_polygon(body, color)
+	draw_polyline(PackedVector2Array([Vector2(19, 0), Vector2(7, -12), Vector2(-15, -10), Vector2(-21, 0), Vector2(-15, 10), Vector2(7, 12), Vector2(19, 0)]), Color("#111827"), 2.0)
+	for cutter_y in [-7, 0, 7]:
+		draw_line(Vector2(5, cutter_y), Vector2(20, cutter_y * 0.45), Color("#facc15"), 3.0)
+	draw_circle(Vector2(-8, 0), 5.0, Color("#451a03"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_repair_enemy(color: Color) -> void:
+	var ring_color := Color(0.3, 1.0, 0.55, 0.28)
+	if repair_flash_time > 0.0:
+		ring_color = Color(0.74, 1.0, 0.3, 0.72)
+	draw_circle(Vector2.ZERO, repair_radius, Color(0.22, 0.95, 0.45, 0.06))
+	draw_circle(Vector2.ZERO, repair_radius, ring_color, false, 2.0)
+	draw_set_transform(Vector2.ZERO, facing_angle, Vector2.ONE)
+	draw_rect(Rect2(Vector2(-14, -12), Vector2(28, 24)), Color("#052e16"))
+	draw_rect(Rect2(Vector2(-11, -9), Vector2(22, 18)), color)
+	draw_circle(Vector2.ZERO, 9.0, Color("#dcfce7"))
+	draw_line(Vector2(-8, 0), Vector2(8, 0), Color("#166534"), 3.0)
+	draw_line(Vector2(0, -8), Vector2(0, 8), Color("#166534"), 3.0)
+	draw_line(Vector2(-17, -10), Vector2(-25, -18), Color("#bbf7d0"), 3.0)
+	draw_line(Vector2(-17, 10), Vector2(-25, 18), Color("#bbf7d0"), 3.0)
+	draw_line(Vector2(17, -10), Vector2(25, -18), Color("#bbf7d0"), 3.0)
+	draw_line(Vector2(17, 10), Vector2(25, 18), Color("#bbf7d0"), 3.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _draw_air_enemy(color: Color) -> void:

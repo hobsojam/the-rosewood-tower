@@ -15,7 +15,7 @@ The title connects this game to an earlier project called The Ivory Tower. "Ivor
 - One map with fixed enemy paths
 - Grid-based tower placement
 - Five tower types: basic, slow, splash, railgun, AAA
-- Seven enemy types: standard, fast, armored, shield, siege, decoy, air
+- Nine enemy types: standard, fast, armored, shield, siege, decoy, air, burrower, repair
 - Ten waves
 - Per-level tower upgrades
 - Between-wave support bonuses
@@ -36,7 +36,7 @@ The title connects this game to an earlier project called The Ivory Tower. "Ivor
 2. Open this folder as a Godot project.
 3. Run the main scene: `res://scenes/Game.tscn`.
 
-The current scaffold includes a code-driven map, placement slots, five tower definitions, seven enemy definitions, 10 waves, and basic HUD state.
+The current scaffold includes a code-driven map, placement slots, five tower definitions, nine enemy definitions, 10 waves, and basic HUD state.
 
 ## Current Controls
 
@@ -60,6 +60,7 @@ Rotor drones have a procedural helicopter loop while air enemies are approaching
 Armored enemies use a distinct top-down tank-style placeholder drawing.
 Shield carriers project a bubble that reduces damage taken by nearby enemies.
 Siege walkers are slow heavy units that cost 2 lives if they breach the exit, while signal decoys are durable low-reward distractions.
+Tunnel Rigs resist non-blast damage, and Repair Drones restore nearby damaged enemies until destroyed.
 Standard and fast enemies now have distinct crawler/drone silhouettes, and each tower type has a unique placeholder shape.
 Tower upgrades now offer tower-specific choices: Rivet chooses rapid fire or sharper damage, Foam chooses stronger slow or wider range, Mortar chooses heavy shells or larger blasts, and Railgun chooses stronger capacitors or a wider bore.
 Tower weapon parts now aim toward their current target.
@@ -69,7 +70,7 @@ Rivet Turrets are tuned as starter/generalist towers: direct fire is weaker into
 Air enemies appear in later waves, ignore Foam and Mortar damage, and AAA is offered as the required support unlock before the first air threat. AAA only targets air, and Foam/Mortars do not fire at air.
 Between-wave city support choices can grant money, lives, or tower-specific match bonuses. Lives start at 12 and are capped at 12, recent choices are temporarily filtered, and repeated tower-family bonuses have diminishing returns.
 The next-wave preview shows the upcoming wave name plus compact enemy composition counts.
-Waves are tuned around distinct pressure patterns, including fast rushes, armor columns, shield convoys, air raids, decoy clutter, and mixed final pressure.
+Waves are tuned around distinct pressure patterns, including fast rushes, armor columns, shield convoys, repair details, air raids, tunnel rigs, decoy clutter, and mixed final pressure.
 Maps are loaded from `data/maps.json`; the title screen can switch between Factory Approach and Pipeworks Loop.
 
 ## Windows Export
