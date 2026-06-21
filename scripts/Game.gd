@@ -15,15 +15,22 @@ const TOWER_BONUS_SCALES := [1.0, 0.67, 0.4]
 const TOWER_ORDER := ["basic", "slow", "splash", "railgun", "aaa"]
 const ENEMY_IDS := ["standard", "fast", "decoy", "repair", "shield", "burrower", "armored", "siege", "air"]
 const ENEMY_CODEX := {
-	"standard": {"name": "Crawler", "description": "Baseline unit. Rivets handle it efficiently."},
-	"fast":     {"name": "Runner Drone", "description": "Fast, fragile unit. Catch it with early coverage."},
-	"shield":   {"name": "Shield Carrier", "description": "Protects nearby enemies. Focus the carrier."},
-	"decoy":    {"name": "Signal Decoy", "description": "Tough, low-reward distraction. Targeting mode matters."},
-	"repair":   {"name": "Repair Drone", "description": "Repairs nearby enemies. Kill it before armored groups."},
-	"burrower": {"name": "Tunnel Rig", "description": "Sprints above ground, then burrows. Mortars handle it best."},
-	"air":      {"name": "Rotor Drone", "description": "Air threat. Requires AAA coverage."},
-	"armored":  {"name": "Armored Hauler", "description": "Resists ordinary direct fire. Railguns and blast help."},
-	"siege":    {"name": "Siege Walker", "description": "Very tough, slow, and costs 2 lives if it breaches."},
+	"standard": {"name": "Crawler",        "description": "Baseline unit. Rivets handle it efficiently.",               "counters": ["basic"]},
+	"fast":     {"name": "Runner Drone",   "description": "Fast, fragile unit. Catch it with early coverage.",          "counters": ["slow", "basic"]},
+	"shield":   {"name": "Shield Carrier", "description": "Protects nearby enemies. Focus the carrier.",                "counters": ["basic", "railgun"]},
+	"decoy":    {"name": "Signal Decoy",   "description": "Tough, low-reward distraction. Targeting mode matters.",     "counters": ["basic"]},
+	"repair":   {"name": "Repair Drone",   "description": "Repairs nearby enemies. Kill it before armored groups.",     "counters": ["railgun", "basic"]},
+	"burrower": {"name": "Tunnel Rig",     "description": "Sprints above ground, then burrows. Mortars handle it best.","counters": ["splash"]},
+	"air":      {"name": "Rotor Drone",    "description": "Air threat. Requires AAA coverage.",                         "counters": ["aaa"]},
+	"armored":  {"name": "Armored Hauler", "description": "Resists ordinary direct fire. Railguns and blast help.",     "counters": ["railgun", "splash"]},
+	"siege":    {"name": "Siege Walker",   "description": "Very tough, slow, and costs 2 lives if it breaches.",        "counters": ["splash", "railgun"]},
+}
+const TOWER_GUIDE := {
+	"basic":   {"name": "Rivet Turret",    "description": "Reliable direct fire. Cost-effective against most threats.", "strong_vs": ["standard", "fast", "decoy", "repair", "shield"]},
+	"slow":    {"name": "Foam Sprayer",    "description": "Slows enemies in range. Essential against fast units.",      "strong_vs": ["fast", "siege"]},
+	"splash":  {"name": "Foundry Mortar",  "description": "Area blast. Punishes groups, armored, and burrowing units.","strong_vs": ["burrower", "armored", "siege"]},
+	"railgun": {"name": "Railgun Spire",   "description": "Pierce fire. Cuts through armor and high-health targets.",  "strong_vs": ["armored", "siege", "shield", "repair"]},
+	"aaa":     {"name": "AAA Flak Turret", "description": "Anti-air flak. Required to damage air threats.",            "strong_vs": ["air"]},
 }
 const INITIAL_UNLOCKED_TOWERS := ["basic"]
 const REQUIRED_COUNTER_UNLOCKS := {
@@ -103,9 +110,13 @@ var tower_buttons := {}
 var next_wave_count_labels := {}
 var seen_enemy_ids: Array[String] = []
 var codex_panel: PanelContainer
+var codex_rows := {}
 var codex_row_labels := {}
 var codex_row_portraits := {}
 var codex_button: Button
+var tower_guide_panel: PanelContainer
+var tower_guide_row_labels := {}
+var tower_guide_button: Button
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -276,6 +287,12 @@ func _create_hud() -> void:
 	codex_button.pressed.connect(_on_codex_pressed)
 	layout.add_child(codex_button)
 
+	tower_guide_button = Button.new()
+	tower_guide_button.text = "Tower Guide"
+	tower_guide_button.toggle_mode = true
+	tower_guide_button.pressed.connect(_on_tower_guide_pressed)
+	layout.add_child(tower_guide_button)
+
 	_create_bonus_panel()
 	_create_settings_panel(layout)
 	_create_selection_panel(layout)
@@ -283,6 +300,7 @@ func _create_hud() -> void:
 	_create_title_panel()
 	_create_feedback_overlays()
 	_create_codex_panel()
+	_create_tower_guide_panel()
 	tower_buttons[selected_tower_id].button_pressed = true
 	speed_1x_button.button_pressed = true
 	_update_tower_unlocks()
@@ -480,6 +498,7 @@ func _create_codex_panel() -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		layout.add_child(row)
+		codex_rows[enemy_id] = row
 
 		var portrait := TextureRect.new()
 		portrait.custom_minimum_size = Vector2(CODEX_PORTRAIT_SIZE)
@@ -518,8 +537,12 @@ func _create_codex_panel() -> void:
 	_update_codex_panel()
 
 func _on_codex_pressed() -> void:
-	codex_panel.visible = not codex_panel.visible
-	codex_button.button_pressed = codex_panel.visible
+	var new_state := not codex_panel.visible
+	if new_state and tower_guide_panel.visible:
+		tower_guide_panel.visible = false
+		tower_guide_button.button_pressed = false
+	codex_panel.visible = new_state
+	codex_button.button_pressed = new_state
 
 func _update_codex_panel() -> void:
 	for enemy_id in codex_row_labels:
@@ -528,7 +551,10 @@ func _update_codex_panel() -> void:
 		if seen_enemy_ids.has(enemy_id):
 			var data: Dictionary = ENEMY_CODEX[enemy_id]
 			portrait.visible = true
-			text.text = "%s\n%s" % [data["name"], data["description"]]
+			var counter_names := PackedStringArray()
+			for tower_id in data["counters"]:
+				counter_names.append(_get_short_tower_name(tower_id))
+			text.text = "%s\n%s\nBest: %s" % [data["name"], data["description"], ", ".join(counter_names)]
 			next_wave_count_labels[enemy_id].tooltip_text = "%s\n%s" % [data["name"], data["description"]]
 		else:
 			portrait.visible = false
@@ -538,9 +564,60 @@ func _update_codex_panel() -> void:
 	for enemy_id in ENEMY_IDS:
 		if not seen_enemy_ids.has(enemy_id):
 			ordered.append(enemy_id)
-	var layout := codex_row_labels[ordered[0]].get_parent()
+	var layout := codex_rows[ordered[0]].get_parent()
 	for i in ordered.size():
-		layout.move_child(codex_row_labels[ordered[i]], i + 1)
+		layout.move_child(codex_rows[ordered[i]], i + 1)
+
+func _on_tower_guide_pressed() -> void:
+	var new_state := not tower_guide_panel.visible
+	if new_state and codex_panel.visible:
+		codex_panel.visible = false
+		codex_button.button_pressed = false
+	tower_guide_panel.visible = new_state
+	tower_guide_button.button_pressed = new_state
+
+func _create_tower_guide_panel() -> void:
+	tower_guide_panel = PanelContainer.new()
+	tower_guide_panel.position = Vector2(178, 30)
+	tower_guide_panel.custom_minimum_size = Vector2(500, 0)
+	hud_layer.add_child(tower_guide_panel)
+
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 6)
+	tower_guide_panel.add_child(layout)
+
+	var title := Label.new()
+	title.text = "Tower Guide"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(title)
+
+	for tower_id in TOWER_ORDER:
+		var row := Label.new()
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.visible = false
+		layout.add_child(row)
+		tower_guide_row_labels[tower_id] = row
+
+	var close_button := Button.new()
+	close_button.text = "Close"
+	close_button.pressed.connect(_on_tower_guide_pressed)
+	layout.add_child(close_button)
+
+	tower_guide_panel.visible = false
+	_update_tower_guide_panel()
+
+func _update_tower_guide_panel() -> void:
+	for tower_id in tower_guide_row_labels:
+		var row: Label = tower_guide_row_labels[tower_id]
+		if unlocked_tower_ids.has(tower_id):
+			var data: Dictionary = TOWER_GUIDE[tower_id]
+			var strong_names := PackedStringArray()
+			for enemy_id in data["strong_vs"]:
+				strong_names.append(ENEMY_CODEX[enemy_id]["name"])
+			row.text = "%s\n%s\nStrong vs: %s" % [data["name"], data["description"], ", ".join(strong_names)]
+			row.visible = true
+		else:
+			row.visible = false
 
 func _get_short_tower_name(tower_id: String) -> String:
 	match tower_id:
@@ -1004,6 +1081,7 @@ func _unlock_tower(tower_id: String) -> bool:
 	unlocked_tower_ids.append(tower_id)
 	selected_tower_id = tower_id
 	_update_tower_unlocks()
+	_update_tower_guide_panel()
 	return true
 
 func _update_tower_unlocks() -> void:
@@ -1091,7 +1169,7 @@ func _pulse_breach_flash() -> void:
 
 func _is_pointer_over_ui() -> bool:
 	var mouse_pos := get_viewport().get_mouse_position()
-	for panel in [hud_panel, bonus_panel, selection_panel, settings_panel, overlay_panel, title_panel, codex_panel]:
+	for panel in [hud_panel, bonus_panel, selection_panel, settings_panel, overlay_panel, title_panel, codex_panel, tower_guide_panel]:
 		if panel != null and panel.visible and panel.get_global_rect().has_point(mouse_pos):
 			return true
 	return false
@@ -1144,7 +1222,11 @@ func _update_hud() -> void:
 	if blocking_open and codex_panel.visible:
 		codex_panel.visible = false
 		codex_button.button_pressed = false
+	if blocking_open and tower_guide_panel.visible:
+		tower_guide_panel.visible = false
+		tower_guide_button.button_pressed = false
 	codex_button.disabled = blocking_open
+	tower_guide_button.disabled = blocking_open
 	volume_label.text = "Volume: %s%%" % int(audio_manager.get_master_volume() * 100.0)
 	volume_slider.value = audio_manager.get_master_volume()
 	mute_button.button_pressed = audio_manager.is_muted()
