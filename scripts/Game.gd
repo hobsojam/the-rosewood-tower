@@ -52,6 +52,8 @@ const WAVE_BONUSES := [
 
 var money := 130
 var lives := STARTING_LIVES
+var kills := 0
+var run_start_time := 0.0
 var selected_tower_id := "basic"
 var tower_data := {}
 var placed_towers: Array[Node2D] = []
@@ -90,6 +92,7 @@ var speed_label: Label
 var status_label: Label
 var selected_tower_label: Label
 var overlay_title_label: Label
+var overlay_stats_label: Label
 var map_label: Label
 var next_map_button: Button
 var start_button: Button
@@ -427,6 +430,11 @@ func _create_overlay_panel() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(title)
 	overlay_title_label = title
+
+	overlay_stats_label = Label.new()
+	overlay_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	overlay_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(overlay_stats_label)
 
 	var overlay_restart_button := Button.new()
 	overlay_restart_button.text = "Restart"
@@ -835,6 +843,7 @@ func _on_mute_toggled(button_pressed: bool) -> void:
 
 func _on_enemy_died(reward: int) -> void:
 	money += reward
+	kills += 1
 	_play_sound("enemy_death")
 	_update_hud()
 
@@ -886,6 +895,16 @@ func _show_end_overlay(title_text: String) -> void:
 		bonus_panel.visible = false
 	if overlay_title_label != null:
 		overlay_title_label.text = title_text
+	if overlay_stats_label != null:
+		var elapsed := int(Time.get_unix_time_from_system() - run_start_time)
+		var minutes := elapsed / 60
+		var seconds := elapsed % 60
+		var wave_reached := max(wave_manager.current_wave + 1, 0)
+		overlay_stats_label.text = "Kills: %d   Lives: %d/%d   Wave: %d/%d   Time: %dm %02ds" % [
+			kills, lives, STARTING_LIVES,
+			wave_reached, wave_manager.total_waves,
+			minutes, seconds
+		]
 	overlay_panel.visible = true
 
 func _show_bonus_choices(wave_number: int) -> void:
@@ -1127,6 +1146,7 @@ func _on_menu_pressed() -> void:
 
 func _on_start_game_pressed() -> void:
 	game_started = true
+	run_start_time = Time.get_unix_time_from_system()
 	title_panel.visible = false
 	status_label.text = "Build defenses, then start wave 1."
 	_update_hud()
