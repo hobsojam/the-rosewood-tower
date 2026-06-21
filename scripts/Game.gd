@@ -183,8 +183,8 @@ func _create_hud() -> void:
 	for enemy_id in ["standard", "fast", "decoy", "repair", "shield", "burrower", "armored", "siege", "air"]:
 		var label := Label.new()
 		label.text = "%s: 0" % _get_enemy_icon(enemy_id)
-		label.tooltip_text = _get_enemy_tooltip(enemy_id)
-		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.tooltip_text = "%s - %s" % [_get_enemy_icon(enemy_id), _get_enemy_tooltip(enemy_id)]
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
 		next_wave_row.add_child(label)
 		next_wave_count_labels[enemy_id] = label
 	layout.add_child(speed_label)
@@ -453,6 +453,8 @@ func _get_short_tower_name(tower_id: String) -> String:
 
 func _get_enemy_icon(enemy_id: String) -> String:
 	match enemy_id:
+		"standard":
+			return "C"
 		"fast":
 			return "D"
 		"shield":
@@ -470,28 +472,32 @@ func _get_enemy_icon(enemy_id: String) -> String:
 		"siege":
 			return "W"
 		_:
-			return "C"
+			push_warning("_get_enemy_icon: unknown enemy_id '%s'" % enemy_id)
+			return "?"
 
 func _get_enemy_tooltip(enemy_id: String) -> String:
 	match enemy_id:
+		"standard":
+			return "Crawler\nBaseline unit. Rivets handle it efficiently."
 		"fast":
-			return "D - Runner Drone\nFast, fragile unit. Catch it with early coverage."
+			return "Runner Drone\nFast, fragile unit. Catch it with early coverage."
 		"shield":
-			return "S - Shield Carrier\nProtects nearby enemies. Focus the carrier."
+			return "Shield Carrier\nProtects nearby enemies. Focus the carrier."
 		"decoy":
-			return "X - Signal Decoy\nTough, low-reward distraction. Targeting mode matters."
+			return "Signal Decoy\nTough, low-reward distraction. Targeting mode matters."
 		"repair":
-			return "R - Repair Drone\nRepairs nearby enemies. Kill it before armored groups."
+			return "Repair Drone\nRepairs nearby enemies. Kill it before armored groups."
 		"burrower":
-			return "B - Tunnel Rig\nSprints above ground, then burrows. Mortars handle it best."
+			return "Tunnel Rig\nSprints above ground, then burrows. Mortars handle it best."
 		"air":
-			return "A - Rotor Drone\nAir threat. Requires AAA coverage."
+			return "Rotor Drone\nAir threat. Requires AAA coverage."
 		"armored":
-			return "T - Armored Hauler\nResists ordinary direct fire. Railguns and blast help."
+			return "Armored Hauler\nResists ordinary direct fire. Railguns and blast help."
 		"siege":
-			return "W - Siege Walker\nVery tough, slow, and costs 2 lives if it breaches."
+			return "Siege Walker\nVery tough, slow, and costs 2 lives if it breaches."
 		_:
-			return "C - Crawler\nBaseline unit. Rivets handle it efficiently."
+			push_warning("_get_enemy_tooltip: unknown enemy_id '%s'" % enemy_id)
+			return ""
 
 func _try_place_tower(global_pos: Vector2) -> void:
 	if not game_started or wave_manager.game_over:
