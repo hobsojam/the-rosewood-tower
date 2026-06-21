@@ -564,9 +564,9 @@ func _update_codex_panel() -> void:
 	for enemy_id in ENEMY_IDS:
 		if not seen_enemy_ids.has(enemy_id):
 			ordered.append(enemy_id)
-	var layout := codex_rows[ordered[0]].get_parent()
+	var layout: Node = codex_rows[ordered[0]].get_parent()
 	for i in ordered.size():
-		layout.move_child(codex_rows[ordered[i]], i + 1)
+		layout.move_child(codex_rows[ordered[i]] as Node, i + 1)
 
 func _on_tower_guide_pressed() -> void:
 	var new_state := not tower_guide_panel.visible
