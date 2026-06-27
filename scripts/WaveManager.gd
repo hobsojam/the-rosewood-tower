@@ -98,7 +98,9 @@ func _count_queue(queue: Array) -> Dictionary:
 
 func _spawn_enemy(enemy_id: String) -> void:
 	var enemy = ENEMY_SCENE.instantiate()
-	enemy.configure(enemy_id, enemy_data[enemy_id], path_points)
+	var data: Dictionary = enemy_data[enemy_id].duplicate()
+	data["health"] = float(data["health"]) * pow(1.15, current_wave)
+	enemy.configure(enemy_id, data, path_points)
 	enemy.died.connect(_on_enemy_died)
 	enemy.reached_exit.connect(_on_enemy_reached_exit)
 	get_tree().current_scene.add_child(enemy)
