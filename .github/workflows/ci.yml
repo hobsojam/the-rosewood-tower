@@ -14,9 +14,9 @@ jobs:
     name: Validate Godot project and export Windows build
     runs-on: ubuntu-latest
     env:
-      GODOT_VERSION: "4.4"
+      GODOT_VERSION: "4.7.1"
       GODOT_RELEASE: "stable"
-      GODOT_VERSION_STATUS: "4.4.stable"
+      GODOT_VERSION_STATUS: "4.7.1.stable"
       EXPORT_PRESET: "Windows Desktop"
       EXPORT_PATH: "builds/windows/TheRosewoodTower.exe"
 

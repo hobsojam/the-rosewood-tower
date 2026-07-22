@@ -77,10 +77,10 @@ Maps are loaded from `data/maps.json`; the title screen can switch between Facto
 
 The project includes a Windows Desktop export preset at `builds/windows/TheRosewoodTower.exe`.
 
-From the project folder, export with:
+From the project folder, export with (run from your local Godot install directory, or add it to `PATH`):
 
 ```powershell
-C:\dev\Godot\Godot_v4.4-stable_win64_console.exe --headless --path . --export-release "Windows Desktop"
+Godot_v4.7.1-stable_win64_console.exe --headless --path . --export-release "Windows Desktop"
 ```
 
 Godot export templates must be installed before the export command will produce an `.exe`.
