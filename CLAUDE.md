@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Windows-native tower defence prototype built with Godot 4.4 and GDScript. Data-driven: maps, waves, towers, and enemies are defined in JSON files under `data/`. Core logic lives in `scripts/Game.gd`, `scripts/WaveManager.gd`, and `scripts/Map.gd`.
+Windows-native tower defence prototype built with Godot 4.7 and GDScript. Data-driven: maps, waves, towers, and enemies are defined in JSON files under `data/`. Core logic lives in `scripts/Game.gd`, `scripts/WaveManager.gd`, and `scripts/Map.gd`.
 
 ## Architecture
 
@@ -11,6 +11,10 @@ Windows-native tower defence prototype built with Godot 4.4 and GDScript. Data-d
 - `scripts/WaveManager.gd` — wave spawning and enemy lifecycle
 - `scripts/Map.gd` — map loading and rendering
 - `scenes/` — Godot scene files
+
+## Setup
+
+Install Godot 4.7 and open the project folder in the editor (or run headless via the console executable below, from your Godot install directory or with it on `PATH`). No package manager or dependency install step is required.
 
 ## Development Commands
 
@@ -23,7 +27,15 @@ python scripts/ci/validate_data.py
 Godot parser check:
 
 ```
-C:\dev\Godot\Godot_v4.4-stable_win64_console.exe --headless --path . --check-only --quit
+Godot_v4.7.1-stable_win64_console.exe --headless --path . --check-only --quit
+```
+
+## Build
+
+Export the Windows build (requires Godot export templates installed):
+
+```
+Godot_v4.7.1-stable_win64_console.exe --headless --path . --export-release "Windows Desktop"
 ```
 
 ## Testing
